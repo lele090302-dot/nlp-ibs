@@ -22,49 +22,49 @@ The result: a 5-minute read that covers exactly what matters to you.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        DATA INGESTION                                │
-│  NewsAPI (keyword queries)  +  RSS Feeds (TechCrunch, Verge, etc.) │
-│                              ↓                                       │
-│                     Deduplication (URL + fuzzy title)                │
+│                        DATA INGESTION                               │
+│  NewsAPI (keyword queries)  +  RSS Feeds (TechCrunch, Verge, etc.)  │
+│                              ↓                                      │
+│                     Deduplication (URL + fuzzy title)               │
 └──────────────────────────────┬──────────────────────────────────────┘
                                ↓
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         NLP PIPELINE                                  │
-│                                                                      │
-│  1. Semantic Relevance Scoring                                       │
+│                         NLP PIPELINE                                │
+│                                                                     │
+│  1. Semantic Relevance Scoring                                      │
 │     └─ sentence-transformers (all-MiniLM-L6-v2)                     │
 │     └─ Cosine similarity: article embedding ↔ topic embedding       │
 │     └─ Threshold filter (≥ 0.3) to remove noise                     │
-│                                                                      │
-│  2. Feedback-Based Personalization                                   │
+│                                                                     │
+│  2. Feedback-Based Personalization                                  │
 │     └─ Per-user source boosting from thumbs up/down history         │
-│     └─ Score adjustment: ±0.05 per signal, capped at ±0.15         │
-│                                                                      │
-│  3. LLM Summarization                                                │
-│     └─ Groq API (Llama 3.1 8B Instant)                             │
-│     └─ Prompt-engineered for concise, factual 2-3 sentence TL;DRs  │
-│                                                                      │
-│  4. Reading Time Estimation                                          │
+│     └─ Score adjustment: ±0.05 per signal, capped at ±0.15          │
+│                                                                     │
+│  3. LLM Summarization                                               │
+│     └─ Groq API (Llama 3.1 8B Instant)                              │
+│     └─ Prompt-engineered for concise, factual 2-3 sentence TL;DRs   │
+│                                                                     │
+│  4. Reading Time Estimation                                         │
 │     └─ Word count / 200 WPM                                         │
 └──────────────────────────────┬──────────────────────────────────────┘
                                ↓
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      EDITORIAL REVIEW                                 │
-│                                                                      │
-│  Two-phase pipeline:                                                 │
+│                      EDITORIAL REVIEW                               │
+│                                                                     │
+│  Two-phase pipeline:                                                │
 │    Phase 1 (07:00 UTC): Stage top 15 candidates → admin review      │
 │    Phase 2 (08:00 UTC): Send approved picks + AI padding to 10      │
-│                                                                      │
-│  Admin gets an email with approve/reject buttons per article.        │
+│                                                                     │
+│  Admin gets an email with approve/reject buttons per article.       │
 │  If no editorial input, AI's top 10 go out automatically.           │
 └──────────────────────────────┬──────────────────────────────────────┘
                                ↓
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        DELIVERY                                       │
-│                                                                      │
-│  Jinja2 HTML template → Amazon SES                                   │
-│  Personalized per subscriber (name, topics, feedback links)          │
-│  Daily (every morning) or Weekly (Mondays) cadence                   │
+│                        DELIVERY                                     │
+│                                                                     │
+│  Jinja2 HTML template → Amazon SES                                  │
+│  Personalized per subscriber (name, topics, feedback links)         │
+│  Daily (every morning) or Weekly (Mondays) cadence                  │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -100,7 +100,7 @@ nlp/
 ## Tech Stack
 
 | Layer | Technology | Purpose |
-|-------|-----------|---------|
+|-------|------------|---------|
 | NLP - Embeddings | `sentence-transformers` (all-MiniLM-L6-v2) | Semantic relevance scoring via cosine similarity |
 | NLP - Summarization | Groq API (Llama 3.1 8B) | Fast, concise article summaries |
 | Data Ingestion | NewsAPI + RSS (feedparser) | Multi-source article fetching |
