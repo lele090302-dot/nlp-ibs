@@ -4,12 +4,12 @@
 
 ## The Problem
 
-As a university student commuting 15 minutes by train each morning, I wanted a way to stay on top of tech, AI, and fintech news without doomscrolling or reading 20-minute articles. Existing newsletters were either too long, too generic, or not personalized to my interests.
+As a working student who used to commute 15 minutes by train to work every morning, I wanted a way to stay on top of tech, AI, and fintech news without doomscrolling or reading one 15-minute article about a single topic. Existing newsletters were either too long, too generic, or not personalized to my interests.
 
 ## The Solution
 
 TL;DR Newsletter is an end-to-end NLP pipeline that:
-1. **Fetches** 100+ articles daily from NewsAPI and curated RSS feeds
+1. **Fetches** 150+ articles daily from NewsAPI and curated RSS feeds
 2. **Ranks** them using semantic similarity (not keyword matching) against each subscriber's chosen topics
 3. **Summarizes** the top 10 into 2-3 sentence TL;DRs using an LLM
 4. **Delivers** a beautifully formatted, personalized email every morning before 8am
@@ -206,7 +206,9 @@ The scheduler runs as a systemd service on AWS EC2. See [`tldr-newsletter/EC2_SE
 
 ## Screenshots
 
-*Landing page and newsletter email screenshots can be added here.*
+<img width="338" height="254" alt="image" src="https://github.com/user-attachments/assets/6eaf6c67-c74f-48aa-8d28-3ed11550345d" />
+<img width="353" height="161" alt="image" src="https://github.com/user-attachments/assets/0d490f4b-cd3f-4225-90d0-ce89c2bda3e2" />
+<img width="362" height="403" alt="image" src="https://github.com/user-attachments/assets/3d3856cd-b719-41f5-8641-28bf98628810" />
 
 ---
 
