@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-cream text-charcoal font-sans antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-terracotta text-white font-sans font-medium px-6 py-3 rounded-full
+           transition-all duration-200 hover:bg-[#b03020] active:scale-95
+           focus:outline-none focus:ring-2 focus:ring-terracotta focus:ring-offset-2;
+  }
+  .btn-outline {
+    @apply border border-terracotta text-terracotta font-sans font-medium px-6 py-3 rounded-full
+           transition-all duration-200 hover:bg-terracotta hover:text-white active:scale-95;
+  }
+  .topic-pill {
+    @apply px-4 py-2 rounded-full border border-border text-sm font-medium font-sans
+           transition-all duration-200 cursor-pointer select-none;
+  }
+  .topic-pill-active {
+    @apply bg-terracotta text-white border-terracotta;
+  }
+  .topic-pill-inactive {
+    @apply bg-white text-charcoal hover:border-burnt hover:text-burnt;
+  }
+}

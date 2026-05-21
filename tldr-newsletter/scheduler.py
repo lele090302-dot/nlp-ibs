@@ -1,0 +1,63 @@
+"""
+scheduler.py - Run the newsletter pipeline on a schedule.
+
+Two-phase schedule:
+  07:00 UTC - Stage: fetch articles, rank, save queue, email admin for review
+  08:00 UTC - Send: use admin-approved articles (or AI fallback if < 10 approved)
+
+Daily users  get emails every day.
+Weekly users get emails every Monday.
+
+Run with: python scheduler.py
+"""
+
+from apscheduler.schedulers.blocking import BlockingScheduler
+from pipeline import stage_pipeline, send_pipeline
+from db import init_db, get_latest_run_id
+
+scheduler = BlockingScheduler(timezone="UTC")
+
+
+# ── Daily users ───────────────────────────────────────────────────────────────
+
+@scheduler.scheduled_job("cron", hour=7, minute=0)
+def daily_stage():
+    """Stage articles for daily subscribers at 07:00 UTC."""
+    print("[Scheduler] Daily stage job starting...")
+    stage_pipeline(frequency_filter="daily")
+
+
+@scheduler.scheduled_job("cron", hour=8, minute=0)
+def daily_send():
+    """Send to daily subscribers at 08:00 UTC (1 hour review window)."""
+    print("[Scheduler] Daily send job starting...")
+    run_id = get_latest_run_id()
+    send_pipeline(run_id=run_id, frequency_filter="daily")
+
+
+# ── Weekly users (Mondays only) ───────────────────────────────────────────────
+
+@scheduler.scheduled_job("cron", day_of_week="mon", hour=7, minute=0)
+def weekly_stage():
+    """Stage articles for weekly subscribers every Monday at 07:00 UTC."""
+    print("[Scheduler] Weekly stage job starting...")
+    stage_pipeline(frequency_filter="weekly")
+
+
+@scheduler.scheduled_job("cron", day_of_week="mon", hour=8, minute=0)
+def weekly_send():
+    """Send to weekly subscribers every Monday at 08:00 UTC."""
+    print("[Scheduler] Weekly send job starting...")
+    run_id = get_latest_run_id()
+    send_pipeline(run_id=run_id, frequency_filter="weekly")
+
+
+if __name__ == "__main__":
+    init_db()
+    print("[Scheduler] Starting... Press Ctrl+C to stop.")
+    print("[Scheduler] Schedule:")
+    print("  07:00 UTC daily   - stage (fetch + rank + notify admin)")
+    print("  08:00 UTC daily   - send  (approved or AI fallback)")
+    print("  07:00 UTC Monday  - stage (weekly users)")
+    print("  08:00 UTC Monday  - send  (weekly users)")
+    scheduler.start()

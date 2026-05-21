@@ -1,0 +1,15 @@
+[Unit]
+Description=TLDR Newsletter Scheduler
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/tldr-newsletter
+Environment=PATH=/opt/tldr-newsletter/.venv/bin:/usr/bin
+ExecStart=/opt/tldr-newsletter/.venv/bin/python /opt/tldr-newsletter/scheduler.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
