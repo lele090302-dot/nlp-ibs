@@ -1,4 +1,4 @@
-# ⚡ TL;DR Newsletter — AI-Powered News Digest Platform
+# TL;DR Newsletter: AI-Powered News Digest Platform
 
 > A full-stack NLP system that fetches, ranks, summarizes, and delivers personalized newsletters to subscribers. Built to solve a real problem: staying informed during a 15-minute commute.
 
