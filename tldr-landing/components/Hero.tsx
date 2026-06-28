@@ -58,8 +58,8 @@ export default function Hero({ selectedTopics, onTopicsChange }: Props) {
       if (res.ok) {
         setStatus("success");
         const cadenceMsg = cadence === "daily"
-          ? "Your newsletter will be delivered every day at 8:00 AM UTC."
-          : "Your newsletter will be delivered every Monday at 8:00 AM UTC.";
+          ? "Your newsletter will be delivered every day at 8:00 AM CET, before your first coffee."
+          : "Your newsletter will be delivered every Monday at 8:00 AM CET, before your first coffee.";
         setMessage(`${data.message ?? "Subscribed!"} ${cadenceMsg}`);
       } else {
         setStatus("error");
