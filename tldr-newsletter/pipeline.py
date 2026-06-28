@@ -298,7 +298,7 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
         html_by_email[user["email"]] = html
 
     print("\n[Pipeline] Sending emails via Amazon SES...")
-    send_to_all_users(users, html_by_email)
+    send_to_all_users(users, html_by_email, run_id=run_id)
     print("\n[Pipeline] Done.")
 
 

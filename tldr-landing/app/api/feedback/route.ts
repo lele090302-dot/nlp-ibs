@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
     db.close();
 
     const message = signal === 1
-      ? "Thanks for your feedback! We'll show you more stories like this."
+      ? "Thanks for your feedback! We'll show you more stories like\u00a0this."
       : "Got it. We'll adjust your future newsletters accordingly.";
 
     return new NextResponse(thankYouHtml(message), {

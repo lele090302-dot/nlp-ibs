@@ -42,6 +42,16 @@ def init_db():
         )
     """)
 
+    # Send log — tracks every newsletter sent to each user
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS send_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL,
+            run_id TEXT,
+            sent_at TEXT NOT NULL
+        )
+    """)
+
     # Admin review queue — holds AI-ranked candidates awaiting editorial approval
     conn.execute("""
         CREATE TABLE IF NOT EXISTS review_queue (
@@ -106,6 +116,39 @@ def unsubscribe(email: str):
     conn.execute("UPDATE users SET active=0 WHERE email=?", (email,))
     conn.commit()
     conn.close()
+
+
+# ── Send log functions ────────────────────────────────────────────────────────
+
+def log_send(email: str, run_id: str | None = None):
+    """Record that a newsletter was successfully sent to this email."""
+    conn = get_connection()
+    conn.execute(
+        "INSERT INTO send_log (email, run_id, sent_at) VALUES (?, ?, ?)",
+        (email, run_id, datetime.now(timezone.utc).isoformat()),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_send_count(email: str) -> int:
+    """Return the total number of newsletters sent to this email."""
+    conn = get_connection()
+    row = conn.execute(
+        "SELECT COUNT(*) as count FROM send_log WHERE email=?", (email,)
+    ).fetchone()
+    conn.close()
+    return row["count"] if row else 0
+
+
+def get_send_history(email: str) -> list[dict]:
+    """Return full send history for a user, most recent first."""
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT * FROM send_log WHERE email=? ORDER BY sent_at DESC", (email,)
+    ).fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
 
 
 # ── Feedback functions ────────────────────────────────────────────────────────

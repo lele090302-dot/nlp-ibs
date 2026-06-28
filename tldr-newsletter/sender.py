@@ -2,6 +2,7 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
+from db import log_send
 
 load_dotenv()
 
@@ -61,10 +62,11 @@ def send_newsletter(recipient_email: str, subject: str, html_content: str) -> bo
         return False
 
 
-def send_to_all_users(users: list[dict], html_by_email: dict[str, str]):
+def send_to_all_users(users: list[dict], html_by_email: dict[str, str], run_id: str | None = None):
     """
     Send personalized newsletters to all active users.
     html_by_email: { email: rendered_html }
+    run_id: optional pipeline run identifier for tracking
     """
     results = {"sent": 0, "failed": 0}
 
@@ -79,6 +81,7 @@ def send_to_all_users(users: list[dict], html_by_email: dict[str, str]):
 
         if success:
             results["sent"] += 1
+            log_send(email, run_id)
         else:
             results["failed"] += 1
 

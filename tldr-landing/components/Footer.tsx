@@ -52,7 +52,7 @@ export default function Footer() {
             </div>
             <p className="font-sans text-sm text-white/70 leading-relaxed max-w-xs">
               AI-curated. Human-readable. The top stories in tech, GenAI, and
-              fintech - delivered daily.
+              fintech, startups and crypto - delivered daily.
             </p>
           </div>
 

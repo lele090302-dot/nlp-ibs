@@ -61,7 +61,7 @@ def main():
     args = parser.parse_args()
 
     html = build_sample_html(args.name, args.to)
-    subject = args.subject or "⚡ TL;DR Newsletter — Test Issue"
+    subject = args.subject or "TL;DR Newsletter — Test Issue"
 
     print("Recipient:", args.to)
     print("Subject:", subject)
