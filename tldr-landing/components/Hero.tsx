@@ -131,7 +131,7 @@ export default function Hero({ selectedTopics, onTopicsChange }: Props) {
             <form
               onSubmit={handleSubmit}
               className="flex flex-col gap-4 max-w-md"
-              id="hero-form"
+              id="form"
             >
               {/* Name */}
               <input

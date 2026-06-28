@@ -83,7 +83,9 @@ export default function Stories() {
             ))}
 
             {/* Stock ticker */}
-            <StockTicker />
+            <div id="market-pulse">
+              <StockTicker />
+            </div>
 
             {/* Quote card */}
             <div className="rounded-2xl border border-border bg-white p-6 shadow-card">

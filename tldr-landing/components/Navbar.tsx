@@ -5,8 +5,9 @@ import Image from "next/image";
 
 const navLinks = [
   { label: "Features", href: "#features" },
-  { label: "Topics", href: "#hero-form" },
+  { label: "Topics", href: "#form" },
   { label: "Stories", href: "#stories" },
+  { label: "Market Pulse", href: "#market-pulse" },
 ];
 
 export default function Navbar() {
@@ -16,13 +17,13 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-cream/90 backdrop-blur-md border-b border-border">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
-        <a href="#" className="flex items-center gap-2 group">
+        <a href="/" className="flex items-center gap-2 group">
           <Image
             src="/logo.png"
             alt="TL;DR Newsletter"
-            width={160}
-            height={48}
-            className="h-10 w-auto"
+            width={200}
+            height={56}
+            className="h-14 w-auto"
             priority
           />
         </a>
@@ -42,7 +43,7 @@ export default function Navbar() {
 
         {/* CTA */}
         <div className="hidden md:block">
-          <a href="#hero-form" className="btn-primary text-sm py-2 px-5">
+          <a href="#form" className="btn-primary text-sm py-2 px-5">
             Subscribe Free
           </a>
         </div>
@@ -76,7 +77,7 @@ export default function Navbar() {
               {label}
             </a>
           ))}
-          <a href="#hero-form" className="btn-primary text-sm text-center" onClick={() => setMenuOpen(false)}>
+          <a href="#form" className="btn-primary text-sm text-center" onClick={() => setMenuOpen(false)}>
             Subscribe Free
           </a>
         </div>

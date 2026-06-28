@@ -40,7 +40,7 @@ def build_html(user_name: str, user_email: str, topics: list[str], articles: lis
 
     # Build unsubscribe and preferences URLs
     unsubscribe_url = f"{APP_BASE_URL}/api/unsubscribe?{urlencode({'email': user_email})}"
-    preferences_url = f"{APP_BASE_URL}/#hero-form"
+    preferences_url = f"{APP_BASE_URL}/#form"
 
     return template.render(
         user_name=user_name,

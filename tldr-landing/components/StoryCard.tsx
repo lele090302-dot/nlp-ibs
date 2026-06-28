@@ -53,7 +53,7 @@ export default function StoryCard({ story }: { story: Story }) {
             ⏱ {story.readingTime} min read
           </span>
           <a
-            href="#hero-form"
+            href="#form"
             className="text-xs font-sans font-semibold text-terracotta hover:underline"
           >
             Subscribe to read →
