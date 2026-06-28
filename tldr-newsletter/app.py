@@ -9,7 +9,7 @@ from db import (
     init_db, add_user, unsubscribe, log_feedback,
     get_review_queue, get_latest_run_id, update_article_status,
 )
-from pipeline import run_pipeline, stage_pipeline, send_pipeline
+from pipeline import run_pipeline, run_pipeline_force, stage_pipeline, send_pipeline
 
 init_db()
 
@@ -145,7 +145,7 @@ with tab_demo:
     if st.button("🚀 Run pipeline now", use_container_width=True):
         with st.spinner("Running pipeline... this may take 30-60 seconds."):
             try:
-                run_pipeline()
+                run_pipeline_force()
                 st.success("✅ Pipeline completed! Check your inbox.")
             except Exception as e:
                 st.error(f"Pipeline error: {e}")

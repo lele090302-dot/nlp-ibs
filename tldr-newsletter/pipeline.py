@@ -214,9 +214,13 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
 
     # Determine article source: admin-approved or AI fallback
     approved: list[dict] = []
+    rejected_urls: set[str] = set()
     if run_id:
         approved = get_approved_articles(run_id)
-        print(f"[Pipeline] Admin approved {len(approved)} articles for run {run_id}.")
+        # Get rejected article URLs so we never include them in AI fallback
+        rejected = get_review_queue(run_id=run_id, status="rejected")
+        rejected_urls = {a["url"] for a in rejected}
+        print(f"[Pipeline] Admin approved {len(approved)} articles, rejected {len(rejected_urls)} for run {run_id}.")
 
     use_admin_picks = len(approved) >= MIN_APPROVED_FOR_OVERRIDE
 
@@ -233,6 +237,9 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
             for topic in user["topics"].split(","):
                 all_topics.add(topic.strip())
         raw_articles = fetch_articles_for_topics(list(all_topics))
+        # Exclude any articles that admin explicitly rejected
+        if rejected_urls:
+            raw_articles = [a for a in raw_articles if a.get("url") not in rejected_urls]
         print(f"[Pipeline] Fetched {len(raw_articles)} raw articles for AI fallback.")
 
     html_by_email: dict[str, str] = {}
@@ -261,7 +268,8 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
 
                 user_raw = [a for a in raw_articles
                             if a.get("topic") in user_topics
-                            and a.get("url") not in approved_urls]
+                            and a.get("url") not in approved_urls
+                            and a.get("url") not in rejected_urls]
                 ai_padding = process_articles(
                     user_raw,
                     user_topics,
@@ -298,7 +306,20 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
 # ── Combined run (manual / demo) ──────────────────────────────────────────────
 
 def run_pipeline(frequency_filter: str | None = None):
-    """Run both phases back-to-back. Used for manual runs and the Streamlit demo button."""
+    """
+    Stage only by default. The send phase must be triggered separately
+    after admin has had time to review.
+    Use --stage to stage, --send to send, or --force-both to run both
+    back-to-back (skips admin review, uses AI selection only).
+    """
+    run_id = stage_pipeline(frequency_filter=frequency_filter)
+    print("\n[Pipeline] Staging complete. Admin can now review articles.")
+    print("[Pipeline] Once review is done, run: python pipeline.py --send")
+    return run_id
+
+
+def run_pipeline_force(frequency_filter: str | None = None):
+    """Run both phases back-to-back WITHOUT waiting for admin review (AI-only selection)."""
     run_id = stage_pipeline(frequency_filter=frequency_filter)
     send_pipeline(run_id=run_id, frequency_filter=frequency_filter)
 
@@ -312,5 +333,8 @@ if __name__ == "__main__":
     elif "--send" in sys.argv:
         run_id = get_latest_run_id()
         send_pipeline(run_id=run_id)
+    elif "--force-both" in sys.argv:
+        run_pipeline_force()
     else:
+        # Default: stage only, so admin has time to review
         run_pipeline()
