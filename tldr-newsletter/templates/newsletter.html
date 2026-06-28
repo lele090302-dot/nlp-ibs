@@ -8,6 +8,8 @@
     body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #FFF8F3; margin: 0; padding: 0; }
     .wrapper { max-width: 640px; margin: 32px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 20px rgba(30,27,24,0.07); }
     .header { background: linear-gradient(135deg, #C83A2A 0%, #b03020 100%); padding: 36px 40px; }
+    .header-logo { margin-bottom: 12px; }
+    .header-logo img { height: 36px; width: auto; }
     .header h1 { color: #ffffff; margin: 0; font-size: 26px; font-family: 'Playfair Display', Georgia, serif; letter-spacing: -0.5px; }
     .header p { color: rgba(255,255,255,0.8); margin: 8px 0 0; font-size: 14px; font-family: 'Inter', sans-serif; }
     .greeting { padding: 28px 40px 0; color: #1E1B18; font-size: 15px; font-family: 'Inter', sans-serif; line-height: 1.5; }
@@ -22,12 +24,15 @@
     .article-summary { font-size: 14px; color: #1E1B18; line-height: 1.7; margin-bottom: 14px; font-family: 'Inter', sans-serif; }
     .read-link { display: inline-block; font-size: 13px; font-weight: 600; color: #C83A2A; text-decoration: none; font-family: 'Inter', sans-serif; }
     .read-link:hover { text-decoration: underline; }
-    .feedback { margin-top: 10px; font-size: 12px; color: #7A6F68; font-family: 'Inter', sans-serif; }
-    .feedback a { text-decoration: none; margin-right: 10px; font-size: 13px; color: #C83A2A; font-weight: 500; }
-    .feedback a:hover { text-decoration: underline; }
+    .feedback { margin-top: 12px; }
+    .feedback-label { font-size: 11px; color: #7A6F68; font-family: 'Inter', sans-serif; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .feedback-btn { display: inline-block; text-decoration: none; font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; padding: 5px 14px; border-radius: 20px; margin-right: 8px; }
+    .feedback-up { background: #F8ECE8; color: #C83A2A; }
+    .feedback-down { background: #f3f4f6; color: #7A6F68; }
+    .feedback-btn:hover { opacity: 0.8; }
     .footer { background: #F8ECE8; padding: 28px 40px; text-align: center; }
-    .footer p { font-size: 12px; color: #7A6F68; margin: 4px 0; font-family: 'Inter', sans-serif; }
-    .footer a { color: #C83A2A; text-decoration: underline; }
+    .footer p { font-size: 12px; color: #7A6F68; margin: 4px 0; font-family: 'Inter', sans-serif; line-height: 1.6; }
+    .footer a { color: #C83A2A; text-decoration: underline; font-weight: 500; }
   </style>
 </head>
 <body>
@@ -35,7 +40,9 @@
 
     <!-- Header -->
     <div class="header">
-      <h1>TL;DR Newsletter</h1>
+      <div class="header-logo">
+        <img src="{{ logo_url }}" alt="TL;DR Newsletter" />
+      </div>
       <p>Your curated digest — {{ date }}</p>
     </div>
 
@@ -66,9 +73,9 @@
       <div class="article-summary">{{ article.summary }}</div>
       <a class="read-link" href="{{ article.url }}" target="_blank">Read full article →</a>
       <div class="feedback">
-        Was this useful?
-        <a href="{{ article.feedback_up_url }}" title="Helpful">Helpful</a>
-        <a href="{{ article.feedback_down_url }}" title="Not relevant">Not relevant</a>
+        <div class="feedback-label">Was this useful?</div>
+        <a class="feedback-btn feedback-up" href="{{ article.feedback_up_url }}">Helpful</a>
+        <a class="feedback-btn feedback-down" href="{{ article.feedback_down_url }}">Not relevant</a>
       </div>
     </div>
     {% if not loop.last %}<hr class="divider"/>{% endif %}
@@ -76,8 +83,8 @@
 
     <!-- Footer -->
     <div class="footer">
-      <p>You're receiving this because you subscribed to TL;DR Newsletter.</p>
-      <p><a href="#">Unsubscribe</a> · <a href="#">Update preferences</a></p>
+      <p>Fine-tune what and how often you receive TL;DR Newsletter.</p>
+      <p><a href="{{ unsubscribe_url }}">Unsubscribe</a> · <a href="{{ preferences_url }}">Update preferences</a></p>
     </div>
 
   </div>

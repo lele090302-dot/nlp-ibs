@@ -17,7 +17,7 @@ def build_feedback_url(base_url: str, email: str, article_url: str, article_sour
         "topic": article_topic,
         "signal": signal,
     })
-    return f"{base_url}/?feedback=1&{params}"
+    return f"{base_url}/api/feedback?{params}"
 
 
 def build_html(user_name: str, user_email: str, topics: list[str], articles: list[dict]) -> str:
@@ -38,9 +38,16 @@ def build_html(user_name: str, user_email: str, topics: list[str], articles: lis
             signal=-1,
         )
 
+    # Build unsubscribe and preferences URLs
+    unsubscribe_url = f"{APP_BASE_URL}/api/unsubscribe?{urlencode({'email': user_email})}"
+    preferences_url = f"{APP_BASE_URL}/#hero-form"
+
     return template.render(
         user_name=user_name,
         topics=topics,
         articles=articles,
         date=datetime.utcnow().strftime("%B %d, %Y"),
+        unsubscribe_url=unsubscribe_url,
+        preferences_url=preferences_url,
+        logo_url=f"{APP_BASE_URL}/logo.png",
     )

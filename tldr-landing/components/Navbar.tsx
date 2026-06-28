@@ -1,6 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+
+const navLinks = [
+  { label: "Features", href: "#features" },
+  { label: "Topics", href: "#hero-form" },
+  { label: "Stories", href: "#stories" },
+];
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -10,23 +17,25 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <a href="#" className="flex items-center gap-2 group">
-          <span className="text-terracotta font-serif font-bold text-xl tracking-tight">
-            TL;DR
-          </span>
-          <span className="text-muted font-sans text-xs uppercase tracking-widest mt-0.5">
-            Newsletter
-          </span>
+          <Image
+            src="/logo.png"
+            alt="TL;DR Newsletter"
+            width={120}
+            height={36}
+            className="h-8 w-auto"
+            priority
+          />
         </a>
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
-          {["Features", "Topics", "Stories"].map((item) => (
+          {navLinks.map(({ label, href }) => (
             <a
-              key={item}
-              href={`#${item.toLowerCase()}`}
+              key={label}
+              href={href}
               className="text-sm font-sans text-muted hover:text-charcoal transition-colors duration-150"
             >
-              {item}
+              {label}
             </a>
           ))}
         </div>
@@ -57,14 +66,14 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden bg-cream border-t border-border px-6 py-4 flex flex-col gap-4">
-          {["Features", "Topics", "Stories"].map((item) => (
+          {navLinks.map(({ label, href }) => (
             <a
-              key={item}
-              href={`#${item.toLowerCase()}`}
+              key={label}
+              href={href}
               className="text-sm font-sans text-charcoal"
               onClick={() => setMenuOpen(false)}
             >
-              {item}
+              {label}
             </a>
           ))}
           <a href="#hero-form" className="btn-primary text-sm text-center" onClick={() => setMenuOpen(false)}>

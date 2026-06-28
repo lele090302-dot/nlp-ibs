@@ -120,8 +120,8 @@ def _send_admin_review_email(run_id: str, articles: list[dict]):
     """Send the admin a digest email with approve/reject links for each article."""
     rows_html = ""
     for i, a in enumerate(articles, 1):
-        approve_url = f"{APP_BASE_URL}/?admin_action=approve&run_id={run_id}&url={a['url']}"
-        reject_url  = f"{APP_BASE_URL}/?admin_action=reject&run_id={run_id}&url={a['url']}"
+        approve_url = f"{APP_BASE_URL}/api/admin?admin_action=approve&run_id={run_id}&url={a['url']}"
+        reject_url  = f"{APP_BASE_URL}/api/admin?admin_action=reject&run_id={run_id}&url={a['url']}"
         score_pct   = int(a.get("relevance_score", 0) * 100)
 
         rows_html += f"""
@@ -177,8 +177,7 @@ def _send_admin_review_email(run_id: str, articles: list[dict]):
       </div>
       <div style="background:#F8ECE8;padding:16px 32px;text-align:center;">
         <p style="font-size:12px;color:#9ca3af;margin:0;">
-          Or review and edit in the
-          <a href="{APP_BASE_URL}" style="color:#C83A2A;">Streamlit admin panel</a>.
+          Approve or reject articles directly from the links above.
         </p>
       </div>
     </div>

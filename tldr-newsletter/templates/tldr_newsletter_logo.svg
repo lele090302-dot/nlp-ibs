@@ -1,0 +1,37 @@
+<svg width="100%" viewBox="0 0 680 220" role="img" xmlns="http://www.w3.org/2000/svg" style="">
+  <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">TL;DR Newsletter Logo</title>
+  <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">A logo for TL;DR Newsletter featuring a bold wordmark with a folded document icon in deep red and warm cream tones</desc>
+
+  <defs>
+    <clipPath id="iconClip">
+      <rect x="0" y="0" width="72" height="80" rx="6"/>
+    </clipPath>
+  </defs>
+
+  <g transform="translate(60, 40)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+
+    
+    <rect x="0" y="0" width="68" height="82" rx="5" fill="#C83A2A" style="fill:rgb(200, 58, 42);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    
+    <polygon points="48,0 68,20 48,20" fill="#8f2419" style="fill:rgb(143, 36, 25);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <rect x="48" y="0" width="20" height="20" rx="0" fill="#b03020" style="fill:rgb(176, 48, 32);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    
+    <rect x="10" y="30" width="32" height="4" rx="2" fill="rgba(255,255,255,0.85)" style="fill:rgba(255, 255, 255, 0.85);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <rect x="10" y="42" width="44" height="4" rx="2" fill="rgba(255,255,255,0.85)" style="fill:rgba(255, 255, 255, 0.85);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <rect x="10" y="54" width="36" height="4" rx="2" fill="rgba(255,255,255,0.85)" style="fill:rgba(255, 255, 255, 0.85);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <rect x="10" y="66" width="24" height="4" rx="2" fill="rgba(255,255,255,0.55)" style="fill:rgba(255, 255, 255, 0.55);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+    
+    <text x="88" y="46" font-family="'Playfair Display', Georgia, serif" font-size="52" font-weight="700" fill="#C83A2A" letter-spacing="-2" style="fill:rgb(200, 58, 42);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Playfair Display&quot;, Georgia, serif;font-size:52px;font-weight:700;text-anchor:start;dominant-baseline:auto">TL;DR</text>
+    <text x="88" y="72" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-weight="500" fill="#7A6F68" letter-spacing="4" style="fill:rgb(122, 111, 104);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Inter, -apple-system, sans-serif;font-size:15px;font-weight:500;text-anchor:start;dominant-baseline:auto">NEWSLETTER</text>
+
+    
+    <rect x="88" y="82" width="280" height="3" rx="1.5" fill="#C83A2A" opacity="0.18" style="fill:rgb(200, 58, 42);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.18;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <rect x="88" y="82" width="60" height="3" rx="1.5" fill="#C83A2A" style="fill:rgb(200, 58, 42);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  </g>
+
+  
+  <text x="60" y="168" font-family="'Inter', -apple-system, sans-serif" font-size="13" fill="#A89990" letter-spacing="0.5" style="fill:rgb(168, 153, 144);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Inter, -apple-system, sans-serif;font-size:13px;font-weight:400;text-anchor:start;dominant-baseline:auto">Your curated digest — the smart shortcut to staying informed</text>
+
+</svg>
