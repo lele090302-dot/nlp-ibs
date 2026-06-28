@@ -9,7 +9,7 @@
     .wrapper { max-width: 640px; margin: 32px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 20px rgba(30,27,24,0.07); }
     .header { background: linear-gradient(135deg, #C83A2A 0%, #b03020 100%); padding: 36px 40px; }
     .header-logo { margin-bottom: 12px; }
-    .header-logo img { height: 56px; width: auto; }
+    .header-logo img { height: 72px; width: auto; }
     .header h1 { color: #ffffff; margin: 0; font-size: 26px; font-family: 'Playfair Display', Georgia, serif; letter-spacing: -0.5px; }
     .header p { color: rgba(255,255,255,0.8); margin: 8px 0 0; font-size: 14px; font-family: 'Inter', sans-serif; }
     .greeting { padding: 28px 40px 0; color: #1E1B18; font-size: 15px; font-family: 'Inter', sans-serif; line-height: 1.5; }
@@ -81,15 +81,11 @@
     {% if not loop.last %}<hr class="divider"/>{% endif %}
     {% endfor %}
 
-    <!-- Feedback Form CTA -->
-    <div style="margin: 0 40px 24px; padding: 24px; background: #F8ECE8; border-radius: 10px; text-align: center;">
-      <p style="font-size: 16px; font-weight: 700; color: #1E1B18; margin: 0 0 8px; font-family: 'Inter', sans-serif;">Got 60 seconds?</p>
-      <p style="font-size: 14px; color: #7A6F68; margin: 0 0 16px; font-family: 'Inter', sans-serif;">Your feedback shapes the next edition.</p>
-      <a href="https://forms.office.com/r/hNbTisJrNb" target="_blank" style="display: inline-block; background: #C83A2A; color: #ffffff; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; padding: 10px 24px; border-radius: 24px; text-decoration: none;">Share your thoughts →</a>
-    </div>
-
     <!-- Footer -->
     <div class="footer">
+      <p style="font-size: 16px; font-weight: 700; color: #1E1B18; margin: 0 0 8px; font-family: 'Inter', sans-serif;">Got 60 seconds?</p>
+      <p style="font-size: 14px; color: #7A6F68; margin: 0 0 16px; font-family: 'Inter', sans-serif;">Your feedback shapes the next edition.</p>
+      <a href="https://forms.office.com/r/hNbTisJrNb" target="_blank" style="display: inline-block; background: #C83A2A; color: #ffffff; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; padding: 10px 24px; border-radius: 24px; text-decoration: none; margin-bottom: 20px;">Share your thoughts →</a>
       <p>Fine-tune what and how often you receive TL;DR Newsletter.</p>
       <p><a href="{{ unsubscribe_url }}">Unsubscribe</a> · <a href="{{ preferences_url }}">Update preferences</a></p>
     </div>

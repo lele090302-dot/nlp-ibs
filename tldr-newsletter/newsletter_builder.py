@@ -49,5 +49,5 @@ def build_html(user_name: str, user_email: str, topics: list[str], articles: lis
         date=datetime.utcnow().strftime("%B %d, %Y"),
         unsubscribe_url=unsubscribe_url,
         preferences_url=preferences_url,
-        logo_url=f"{APP_BASE_URL}/logo.png",
+        logo_url=f"{APP_BASE_URL}/logo-beige.png",
     )

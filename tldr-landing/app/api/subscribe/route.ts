@@ -11,12 +11,11 @@ const TOPIC_MAP: Record<string, string> = {
   "Crypto":        "Crypto",
 };
 
-// Path to the shared SQLite DB — relative to the monorepo root
-// Adjust if your folder structure differs
-const DB_PATH = path.resolve(
-  process.cwd(),
-  "../tldr-newsletter/data/users.db"
-);
+// Path to the shared SQLite DB
+// Use DB_PATH env var in production, fall back to relative path for local dev
+const DB_PATH = process.env.DB_PATH
+  ? path.resolve(process.env.DB_PATH)
+  : path.resolve(process.cwd(), "../tldr-newsletter/data/users.db");
 
 export async function POST(req: NextRequest) {
   let body: { name?: string; email?: string; topics?: string[]; frequency?: string };

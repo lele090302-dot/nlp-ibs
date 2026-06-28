@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 
-const DB_PATH = path.resolve(
-  process.cwd(),
-  "../tldr-newsletter/data/users.db"
-);
+// Path to the shared SQLite DB
+// Use DB_PATH env var in production, fall back to relative path for local dev
+const DB_PATH = process.env.DB_PATH
+  ? path.resolve(process.env.DB_PATH)
+  : path.resolve(process.cwd(), "../tldr-newsletter/data/users.db");
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
