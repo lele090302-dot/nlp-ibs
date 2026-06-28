@@ -3,23 +3,40 @@
 import { useState } from "react";
 import Image from "next/image";
 
+const topics = [
+  { label: "Generative AI", short: "GenAI" },
+  { label: "Fintech",       short: "Fintech" },
+  { label: "Tech",          short: "Tech" },
+  { label: "Startups",      short: "Startups" },
+  { label: "Crypto",        short: "Crypto" },
+];
+
 interface Props {
   selectedTopics: string[];
+  onTopicsChange: (topics: string[]) => void;
 }
 
 type Status = "idle" | "loading" | "success" | "error";
 
-export default function Hero({ selectedTopics }: Props) {
+export default function Hero({ selectedTopics, onTopicsChange }: Props) {
   const [name, setName]       = useState("");
   const [email, setEmail]     = useState("");
   const [cadence, setCadence] = useState<"daily" | "weekly">("daily");
   const [status, setStatus]   = useState<Status>("idle");
   const [message, setMessage] = useState("");
 
+  const toggleTopic = (label: string) => {
+    onTopicsChange(
+      selectedTopics.includes(label)
+        ? selectedTopics.filter((t) => t !== label)
+        : [...selectedTopics, label]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) { setMessage("Please enter your name."); return; }
-    if (selectedTopics.length === 0) { setMessage("Please select at least one topic above."); return; }
+    if (selectedTopics.length === 0) { setMessage("Please select at least one topic."); return; }
 
     setStatus("loading");
     setMessage("");
@@ -55,7 +72,7 @@ export default function Hero({ selectedTopics }: Props) {
     <section className="max-w-6xl mx-auto px-6 pt-16 pb-20 md:pt-24 md:pb-28">
       <div className="grid md:grid-cols-2 gap-12 items-center">
 
-        {/* Left - copy */}
+        {/* Left - copy + form */}
         <div className="flex flex-col gap-6">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 self-start">
@@ -77,6 +94,32 @@ export default function Hero({ selectedTopics }: Props) {
             don&apos;t have to. Personalized summaries on tech, GenAI, and
             fintech - delivered daily.
           </p>
+
+          {/* Topic selection - inline */}
+          <div>
+            <p className="text-xs font-sans font-semibold uppercase tracking-widest text-muted mb-3">
+              Choose your topics
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {topics.map(({ label, short }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => toggleTopic(label)}
+                  className={`topic-pill text-sm ${
+                    selectedTopics.includes(label) ? "topic-pill-active" : "topic-pill-inactive"
+                  }`}
+                >
+                  {short}
+                </button>
+              ))}
+            </div>
+            {selectedTopics.length === 0 && (
+              <p className="text-xs font-sans text-terracotta mt-2">
+                Select at least one topic to get started.
+              </p>
+            )}
+          </div>
 
           {/* Form */}
           {status === "success" ? (
@@ -114,19 +157,10 @@ export default function Hero({ selectedTopics }: Props) {
                            focus:ring-terracotta/40 transition"
               />
 
-              {/* Topics summary */}
-              <div className="px-1">
-                <p className="text-xs font-sans text-muted">
-                  {selectedTopics.length === 0
-                    ? "⚠ Select topics in the section below first."
-                    : `Topics: ${selectedTopics.join(", ")}`}
-                </p>
-              </div>
-
               {/* Cadence */}
               <div>
                 <p className="text-xs font-sans font-semibold uppercase tracking-widest text-muted mb-2">
-                  Cadence Preference
+                  Cadence
                 </p>
                 <div className="flex gap-2">
                   {(["daily", "weekly"] as const).map((option) => (
@@ -140,7 +174,7 @@ export default function Hero({ selectedTopics }: Props) {
                           : "bg-white text-charcoal border-border hover:border-burnt hover:text-burnt"
                         }`}
                     >
-                      {option === "daily" ? "☀️ Daily" : "📅 Weekly"}
+                      {option === "daily" ? "Daily" : "Weekly"}
                     </button>
                   ))}
                 </div>
@@ -156,7 +190,7 @@ export default function Hero({ selectedTopics }: Props) {
 
               <button
                 type="submit"
-                disabled={status === "loading"}
+                disabled={status === "loading" || selectedTopics.length === 0}
                 className="btn-primary text-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {status === "loading" ? "Subscribing..." : "Get Started"}
@@ -203,16 +237,23 @@ export default function Hero({ selectedTopics }: Props) {
             </div>
 
             <div className="px-6 pb-6 flex gap-2 flex-wrap">
-              {["GenAI", "Fintech", "Startups"].map((t) => (
-                <span key={t} className="text-xs font-sans font-medium px-3 py-1 rounded-full bg-blush text-terracotta">
-                  {t}
-                </span>
-              ))}
+              {selectedTopics.length > 0
+                ? selectedTopics.map((t) => (
+                    <span key={t} className="text-xs font-sans font-medium px-3 py-1 rounded-full bg-blush text-terracotta">
+                      {t}
+                    </span>
+                  ))
+                : ["GenAI", "Fintech", "Startups"].map((t) => (
+                    <span key={t} className="text-xs font-sans font-medium px-3 py-1 rounded-full bg-blush text-terracotta">
+                      {t}
+                    </span>
+                  ))
+              }
             </div>
           </div>
 
           <div className="absolute -bottom-4 -left-6 bg-white rounded-2xl shadow-card border border-border px-5 py-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blush flex items-center justify-center text-terracotta text-lg">⚡</div>
+            <div className="w-10 h-10 rounded-full bg-blush flex items-center justify-center text-terracotta font-sans font-bold text-sm">TL;DR</div>
             <div>
               <p className="text-xs font-sans text-muted">Avg. reading time</p>
               <p className="text-sm font-sans font-semibold text-charcoal">Under 5 minutes</p>
