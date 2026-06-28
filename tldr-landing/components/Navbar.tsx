@@ -20,9 +20,9 @@ export default function Navbar() {
           <Image
             src="/logo.png"
             alt="TL;DR Newsletter"
-            width={120}
-            height={36}
-            className="h-8 w-auto"
+            width={160}
+            height={48}
+            className="h-10 w-auto"
             priority
           />
         </a>
