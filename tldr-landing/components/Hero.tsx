@@ -57,7 +57,10 @@ export default function Hero({ selectedTopics, onTopicsChange }: Props) {
 
       if (res.ok) {
         setStatus("success");
-        setMessage(data.message ?? "Subscribed!");
+        const cadenceMsg = cadence === "daily"
+          ? "Your newsletter will be delivered every day at 8:00 AM UTC."
+          : "Your newsletter will be delivered every Monday at 8:00 AM UTC.";
+        setMessage(`${data.message ?? "Subscribed!"} ${cadenceMsg}`);
       } else {
         setStatus("error");
         setMessage(data.error ?? "Something went wrong. Please try again.");
@@ -69,8 +72,8 @@ export default function Hero({ selectedTopics, onTopicsChange }: Props) {
   };
 
   return (
-    <section className="max-w-6xl mx-auto px-6 pt-16 pb-20 md:pt-24 md:pb-28">
-      <div className="grid md:grid-cols-2 gap-12 items-center">
+    <section id="form" className="max-w-6xl mx-auto px-6 pt-16 pb-20 md:pt-24 md:pb-28">
+      <div className="grid md:grid-cols-2 gap-12 items-start">
 
         {/* Left - copy + form */}
         <div className="flex flex-col gap-6">
@@ -123,15 +126,14 @@ export default function Hero({ selectedTopics, onTopicsChange }: Props) {
 
           {/* Form */}
           {status === "success" ? (
-            <div className="flex items-center gap-3 bg-blush border border-border rounded-2xl px-5 py-4 max-w-md">
-              <span className="text-terracotta text-xl">✓</span>
-              <p className="font-sans text-sm text-charcoal">{message}</p>
+            <div className="flex items-start gap-3 bg-blush border border-border rounded-2xl px-5 py-4 max-w-md">
+              <span className="text-terracotta text-xl mt-0.5">✓</span>
+              <p className="font-sans text-sm text-charcoal leading-relaxed">{message}</p>
             </div>
           ) : (
             <form
               onSubmit={handleSubmit}
               className="flex flex-col gap-4 max-w-md"
-              id="form"
             >
               {/* Name */}
               <input
@@ -252,8 +254,9 @@ export default function Hero({ selectedTopics, onTopicsChange }: Props) {
             </div>
           </div>
 
-          <div className="absolute -bottom-4 -left-6 bg-white rounded-2xl shadow-card border border-border px-5 py-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blush flex items-center justify-center text-terracotta font-sans font-bold text-sm">TL;DR</div>
+          {/* Reading time card - positioned below the main card */}
+          <div className="mt-6 bg-white rounded-2xl shadow-card border border-border px-5 py-4 flex items-center gap-3 w-fit">
+            <div className="w-10 h-10 rounded-full bg-blush flex items-center justify-center text-terracotta font-sans font-bold text-xs">TL;DR</div>
             <div>
               <p className="text-xs font-sans text-muted">Avg. reading time</p>
               <p className="text-sm font-sans font-semibold text-charcoal">Under 5 minutes</p>

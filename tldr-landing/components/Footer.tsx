@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 
 const navLinks = [
   { label: "Features", href: "#features" },
-  { label: "Topics", href: "#form" },
+  { label: "Choose your topics", href: "#form" },
   { label: "Stories", href: "#stories" },
   { label: "Market Pulse", href: "#market-pulse" },
 ];
@@ -45,15 +44,12 @@ export default function Footer() {
 
           {/* Brand */}
           <div className="flex flex-col gap-4">
-            <a href="/">
-              <Image
-                src="/logo.png"
-                alt="TL;DR Newsletter"
-                width={140}
-                height={42}
-                className="h-10 w-auto brightness-0 invert"
-              />
-            </a>
+            <div>
+              <span className="font-serif font-bold text-2xl tracking-tight">TL;DR</span>
+              <span className="block text-white/60 font-sans text-xs uppercase tracking-widest mt-0.5">
+                Newsletter
+              </span>
+            </div>
             <p className="font-sans text-sm text-white/70 leading-relaxed max-w-xs">
               AI-curated. Human-readable. The top stories in tech, GenAI, and
               fintech - delivered daily.
