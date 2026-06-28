@@ -5,7 +5,7 @@ Two-phase flow:
   Phase 1 (stage_pipeline):  Fetch articles, rank top 15, save to review queue,
                               email admin a review digest.
   Phase 2 (send_pipeline):   Use admin-approved articles (if >= 10 approved),
-                              otherwise fall back to AI top 10 automatically.
+                              otherwise fall back to AI top 8-10 automatically.
 
 Run both phases manually:
   python pipeline.py --stage   # fetch + queue + notify admin
@@ -41,6 +41,10 @@ REVIEW_POOL_SIZE = 15
 
 # Minimum approved articles needed to use admin picks; below this, fall back to AI
 MIN_APPROVED_FOR_OVERRIDE = 1  # any approval triggers editorial mode
+
+# Article count constraints for the final newsletter
+MIN_ARTICLES = 8
+MAX_ARTICLES = 10
 
 
 # ── Phase 1: Stage ────────────────────────────────────────────────────────────
@@ -155,8 +159,8 @@ def _send_admin_review_email(run_id: str, articles: list[dict]):
         <p style="color:rgba(255,255,255,0.75);margin:6px 0 0;font-size:13px;">
           {len(articles)} candidates for run <code style="color:#fff;">{run_id}</code> -
           approve any stories to include them. Approved picks come first; AI fills
-          remaining slots to always deliver exactly 10 stories.
-          If you approve nothing, the AI top 10 go out automatically.
+          remaining slots to always deliver {MIN_ARTICLES}-{MAX_ARTICLES} stories.
+          If you approve nothing, the AI top {MAX_ARTICLES} go out automatically.
         </p>
       </div>
       <div style="padding:24px 32px;">
@@ -197,7 +201,7 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
     """
     Build and send newsletters to all active subscribers.
     Uses admin-approved articles if >= MIN_APPROVED_FOR_OVERRIDE are approved,
-    otherwise falls back to AI top 10 per user.
+    otherwise falls back to AI top 8-10 per user.
     """
     print("=" * 50)
     print("[Pipeline] Phase 2: Sending newsletters...")
@@ -219,7 +223,7 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
     if use_admin_picks:
         print(f"[Pipeline] Using {len(approved)} admin-approved articles.")
     else:
-        print(f"[Pipeline] Fewer than {MIN_APPROVED_FOR_OVERRIDE} approved - falling back to AI selection.")
+        print(f"[Pipeline] Fewer than {MIN_APPROVED_FOR_OVERRIDE} approved - falling back to AI selection (targeting {MIN_ARTICLES}-{MAX_ARTICLES} articles).")
 
     # Fetch raw articles for AI fallback (only if needed)
     raw_articles: list[dict] = []
@@ -239,13 +243,13 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
         if use_admin_picks:
             # Start with approved articles filtered to this user's topics
             user_approved = [a for a in approved if a.get("topic") in user_topics]
-            # If fewer than 10 approved for this user's topics, add remaining approved articles
-            if len(user_approved) < 10:
+            # If fewer than MAX_ARTICLES approved for this user's topics, add remaining approved articles
+            if len(user_approved) < MAX_ARTICLES:
                 extras = [a for a in approved if a not in user_approved]
-                user_approved += extras[:10 - len(user_approved)]
+                user_approved += extras[:MAX_ARTICLES - len(user_approved)]
 
-            # Still short of 10? Pad with AI-ranked articles not already included
-            if len(user_approved) < 10:
+            # Still short of MIN_ARTICLES? Pad with AI-ranked articles not already included
+            if len(user_approved) < MIN_ARTICLES:
                 approved_urls = {a["url"] for a in user_approved}
                 # Fetch and rank remaining articles as fallback padding
                 if not raw_articles:
@@ -261,19 +265,19 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
                 ai_padding = process_articles(
                     user_raw,
                     user_topics,
-                    top_n=10 - len(user_approved),
+                    top_n=MAX_ARTICLES - len(user_approved),
                     feedback_boost=feedback_boost,
                 )
                 user_approved += ai_padding
-                print(f"[Pipeline] Padded with {len(ai_padding)} AI picks to reach 10.")
+                print(f"[Pipeline] Padded with {len(ai_padding)} AI picks to reach {MIN_ARTICLES}-{MAX_ARTICLES}.")
 
-            enriched = user_approved[:10]
+            enriched = user_approved[:MAX_ARTICLES]
         else:
             user_articles = [a for a in raw_articles if a.get("topic") in user_topics]
             enriched = process_articles(
                 user_articles,
                 user_topics,
-                top_n=10,
+                top_n=MAX_ARTICLES,
                 feedback_boost=feedback_boost,
             )
 

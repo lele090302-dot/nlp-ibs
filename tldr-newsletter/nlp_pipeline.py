@@ -118,10 +118,91 @@ def estimate_reading_time(text: str) -> int:
 RELEVANCE_THRESHOLD = 0.3
 
 
+def _balanced_select(ranked: list[dict], user_topics: list[str], top_n: int) -> list[dict]:
+    """
+    Select top_n articles with balanced representation across user_topics.
+
+    Strategy:
+    1. Allocate slots equally: each topic gets floor(top_n / num_topics) slots.
+    2. Remaining slots (from rounding) are distributed round-robin to topics
+       that still have available articles, ordered by highest next-article score.
+    3. Fill each topic's allocation with its highest-scored articles.
+    4. If a topic can't fill its slots (not enough articles), redistribute
+       those empty slots to other topics that have surplus candidates.
+    """
+    num_topics = len(user_topics)
+    if num_topics == 0:
+        return ranked[:top_n]
+
+    # Group articles by topic (preserving score order within each group)
+    by_topic: dict[str, list[dict]] = {t: [] for t in user_topics}
+    uncategorized: list[dict] = []
+
+    for article in ranked:
+        topic = article.get("topic", "")
+        if topic in by_topic:
+            by_topic[topic].append(article)
+        else:
+            uncategorized.append(article)
+
+    # Base allocation per topic
+    base_per_topic = top_n // num_topics
+    remainder = top_n - (base_per_topic * num_topics)
+
+    # Determine how many slots each topic gets
+    allocation: dict[str, int] = {t: base_per_topic for t in user_topics}
+
+    # Distribute remainder slots to topics that have the most available articles
+    topics_by_availability = sorted(
+        user_topics,
+        key=lambda t: len(by_topic[t]),
+        reverse=True,
+    )
+    for i in range(remainder):
+        allocation[topics_by_availability[i % num_topics]] += 1
+
+    # Fill each topic's allocation
+    selected: list[dict] = []
+    unfilled_slots = 0
+
+    for topic in user_topics:
+        available = by_topic[topic]
+        take = min(allocation[topic], len(available))
+        selected.extend(available[:take])
+        unfilled_slots += allocation[topic] - take
+
+    # Redistribute unfilled slots: pick from topics with leftover articles or uncategorized
+    if unfilled_slots > 0:
+        already_selected_urls = {a.get("url") for a in selected}
+        # Candidates: remaining articles from any topic + uncategorized, by score
+        overflow_candidates = []
+        for topic in user_topics:
+            taken_count = min(allocation[topic], len(by_topic[topic]))
+            overflow_candidates.extend(by_topic[topic][taken_count:])
+        overflow_candidates.extend(uncategorized)
+        overflow_candidates = [
+            a for a in overflow_candidates if a.get("url") not in already_selected_urls
+        ]
+        overflow_candidates.sort(key=lambda x: x["relevance_score"], reverse=True)
+        selected.extend(overflow_candidates[:unfilled_slots])
+
+    # Final sort by relevance so the newsletter reads well (highest first)
+    selected.sort(key=lambda x: x["relevance_score"], reverse=True)
+
+    topic_counts = {}
+    for a in selected:
+        t = a.get("topic", "unknown")
+        topic_counts[t] = topic_counts.get(t, 0) + 1
+    print(f"[NLP] Balanced distribution: {topic_counts} (total {len(selected)})")
+
+    return selected[:top_n]
+
+
 def process_articles(
     articles: list[dict],
     user_topics: list[str],
     top_n: int = 10,
+    min_articles: int = 8,
     feedback_boost: dict[str, float] | None = None,
 ) -> list[dict]:
     """
@@ -129,7 +210,7 @@ def process_articles(
     1. Score relevance for user topics
     2. Apply relevance threshold — drop articles below RELEVANCE_THRESHOLD
     3. Apply feedback boost — articles from sources the user liked rank higher
-    4. Pick top N articles
+    4. Pick top N articles (minimum min_articles, maximum top_n)
     5. Summarize each
     6. Estimate reading time
     Returns enriched article dicts ready for the newsletter.
@@ -149,6 +230,12 @@ def process_articles(
         ranked = score_relevance(articles, user_topics)
         ranked = [a for a in ranked if a["relevance_score"] >= 0.1]
 
+    # If we still don't have enough articles after filtering, lower threshold further
+    if len(ranked) < min_articles:
+        print(f"[NLP] Warning: only {len(ranked)} articles after filtering, need at least {min_articles}. Lowering threshold to 0.05.")
+        ranked = score_relevance(articles, user_topics)
+        ranked = [a for a in ranked if a["relevance_score"] >= 0.05]
+
     # Apply feedback boost: bump score for sources the user has liked before
     if feedback_boost:
         for article in ranked:
@@ -158,7 +245,15 @@ def process_articles(
         ranked = sorted(ranked, key=lambda x: x["relevance_score"], reverse=True)
         print(f"[NLP] Feedback boost applied for {len(feedback_boost)} source(s).")
 
-    top_articles = ranked[:top_n]
+    # ── Balanced topic distribution ───────────────────────────────────────────
+    # Instead of taking the global top_n (which can skew heavily toward one topic),
+    # distribute slots equally across the user's topics, then fill any remaining
+    # slots from the overall ranked list.
+    top_articles = _balanced_select(ranked, user_topics, top_n)
+
+    # Ensure we have at least min_articles
+    if len(top_articles) < min_articles:
+        print(f"[NLP] Warning: only {len(top_articles)} articles selected, minimum is {min_articles}.")
 
     print(f"[NLP] Summarizing top {len(top_articles)} articles...")
     enriched = []

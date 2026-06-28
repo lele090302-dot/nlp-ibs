@@ -41,7 +41,7 @@ def send_newsletter(recipient_email: str, subject: str, html_content: str) -> bo
                     "Html": {"Data": html_content, "Charset": "UTF-8"},
                     "Text": {
                         # Plain text fallback for email clients that don't render HTML
-                        "Data": "Your TL;DR Newsletter — please view in an HTML-capable email client.",
+                        "Data": "Your TL;DR Newsletter - please view in an HTML-capable email client.",
                         "Charset": "UTF-8",
                     },
                 },
@@ -74,7 +74,7 @@ def send_to_all_users(users: list[dict], html_by_email: dict[str, str]):
         if not html:
             continue
 
-        subject = f"⚡ Your TL;DR Newsletter — {', '.join(user['topics'].split(','))}"
+        subject = f"Your TL;DR Newsletter - {', '.join(user['topics'].split(','))}"
         success = send_newsletter(email, subject, html)
 
         if success:

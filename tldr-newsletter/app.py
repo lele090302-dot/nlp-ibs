@@ -66,7 +66,7 @@ if params.get("admin_action") in ("approve", "reject"):
 # ── Header ────────────────────────────────────────────────────────────────────
 st.title("⚡ TL;DR Newsletter")
 st.markdown(
-    "AI-curated digest of the top 10 stories in your chosen topics, "
+    "AI-curated digest of the top 8-10 stories in your chosen topics, "
     "delivered to your inbox."
 )
 st.divider()
@@ -180,7 +180,7 @@ with tab_demo:
             ]
             html = build_html(preview_name, preview_email, ["GenAI", "Fintech"], sample_articles)
             with st.spinner("Sending via Amazon SES..."):
-                success = send_newsletter(preview_email, "⚡ TL;DR Newsletter - Sample Issue", html)
+                success = send_newsletter(preview_email, "TL;DR Newsletter - Sample Issue", html)
             if success:
                 st.success(f"✅ Sample email sent to {preview_email}!")
             else:
@@ -208,7 +208,7 @@ with tab_admin:
     st.markdown(
         "Review AI-ranked article candidates before they go out. "
         "Approve any stories to include them - approved picks go first, "
-        "AI fills remaining slots to always deliver exactly **10 stories**. "
+        "AI fills remaining slots to always deliver **8-10 stories**. "
         "If you approve nothing, the AI's top 10 are sent automatically."
     )
 
