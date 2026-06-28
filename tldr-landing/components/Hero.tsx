@@ -94,8 +94,7 @@ export default function Hero({ selectedTopics, onTopicsChange }: Props) {
           {/* Subheadline */}
           <p className="font-sans text-lg text-muted leading-relaxed max-w-md">
             We pick the most relevant stories from hundreds of articles so you
-            don&apos;t have to. Personalized summaries on tech, GenAI, and
-            fintech, startups and crypto - delivered daily.
+            don&apos;t have to.
           </p>
 
           {/* Topic selection - inline */}
