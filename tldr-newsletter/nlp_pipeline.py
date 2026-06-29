@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from dateutil import parser as dateutil_parser
 from groq import Groq
 from sentence_transformers import SentenceTransformer, util
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -146,8 +147,10 @@ def summarize_article(article: dict) -> str:
         return _clean_summary(response.choices[0].message.content.strip())
     except Exception as e:
         print(f"[NLP] Summarization error for '{article['title']}': {e}")
-        # Fallback: return truncated description
-        return _clean_summary((article.get("description") or article["title"])[:200])
+        # Fallback: return truncated description (strip HTML tags first)
+        fallback = article.get("description") or article["title"]
+        fallback = BeautifulSoup(fallback, "html.parser").get_text(separator=" ").strip()
+        return _clean_summary(fallback[:200])
 
 
 # ── 3. Reading Time Estimation ────────────────────────────────────────────────
