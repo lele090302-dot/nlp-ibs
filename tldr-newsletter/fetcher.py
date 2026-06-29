@@ -51,7 +51,7 @@ TOPIC_KEYWORDS = {
 }
 
 
-def fetch_from_newsapi(topic: str, page_size: int = 20, freshness_days: int = 3) -> list[dict]:
+def fetch_from_newsapi(topic: str, page_size: int = 20, freshness_days: int = 5) -> list[dict]:
     """Fetch articles from NewsAPI for a given topic."""
     if not NEWS_API_KEY:
         return []
@@ -90,7 +90,7 @@ def fetch_from_newsapi(topic: str, page_size: int = 20, freshness_days: int = 3)
         return []
 
 
-def fetch_from_rss(topic: str, max_per_feed: int = 10, freshness_days: int = 3) -> list[dict]:
+def fetch_from_rss(topic: str, max_per_feed: int = 10, freshness_days: int = 5) -> list[dict]:
     """Fetch articles from RSS feeds for a given topic."""
     articles = []
     feeds = RSS_FEEDS.get(topic, [])
@@ -147,7 +147,7 @@ def deduplicate(articles: list[dict]) -> list[dict]:
     return unique
 
 
-def fetch_articles_for_topics(topics: list[str], freshness_days: int = 3) -> list[dict]:
+def fetch_articles_for_topics(topics: list[str], freshness_days: int = 5) -> list[dict]:
     """Main entry point: fetch and deduplicate articles for a list of topics."""
     all_articles = []
 

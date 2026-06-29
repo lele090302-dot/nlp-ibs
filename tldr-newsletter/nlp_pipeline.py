@@ -169,7 +169,7 @@ def estimate_reading_time(text: str) -> int:
 
 # Minimum cosine similarity score for an article to be included in the newsletter.
 # Articles below this threshold are considered too loosely related to the user's topics.
-RELEVANCE_THRESHOLD = 0.3
+RELEVANCE_THRESHOLD = 0.2
 
 
 def _balanced_select(ranked: list[dict], user_topics: list[str], top_n: int) -> list[dict]:

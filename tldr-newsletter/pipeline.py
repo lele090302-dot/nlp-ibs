@@ -72,10 +72,10 @@ def stage_pipeline(frequency_filter: str | None = None) -> str | None:
             all_topics.add(topic.strip())
 
     print(f"[Pipeline] Topics: {all_topics}")
-    raw_articles = fetch_articles_for_topics(list(all_topics), freshness_days=3)
+    raw_articles = fetch_articles_for_topics(list(all_topics), freshness_days=5)
     if len(raw_articles) < MIN_ARTICLES:
-        print("[Pipeline] Insufficient fresh articles (3-day window). Widening to 5 days...")
-        raw_articles = fetch_articles_for_topics(list(all_topics), freshness_days=5)
+        print("[Pipeline] Insufficient fresh articles (5-day window). Widening to 7 days...")
+        raw_articles = fetch_articles_for_topics(list(all_topics), freshness_days=7)
     print(f"[Pipeline] Fetched {len(raw_articles)} raw articles.")
 
     # Score and filter globally (not per-user) for the admin queue
@@ -240,10 +240,10 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
         for user in users:
             for topic in user["topics"].split(","):
                 all_topics.add(topic.strip())
-        raw_articles = fetch_articles_for_topics(list(all_topics), freshness_days=3)
+        raw_articles = fetch_articles_for_topics(list(all_topics), freshness_days=5)
         if len(raw_articles) < MIN_ARTICLES:
-            print("[Pipeline] Insufficient fresh articles (3-day window). Widening to 5 days...")
-            raw_articles = fetch_articles_for_topics(list(all_topics), freshness_days=5)
+            print("[Pipeline] Insufficient fresh articles (5-day window). Widening to 7 days...")
+            raw_articles = fetch_articles_for_topics(list(all_topics), freshness_days=7)
         # Exclude any articles that admin explicitly rejected
         if rejected_urls:
             raw_articles = [a for a in raw_articles if a.get("url") not in rejected_urls]
@@ -273,10 +273,10 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
                     for u in users:
                         for t in u["topics"].split(","):
                             all_topics_fallback.add(t.strip())
-                    raw_articles = fetch_articles_for_topics(list(all_topics_fallback), freshness_days=3)
+                    raw_articles = fetch_articles_for_topics(list(all_topics_fallback), freshness_days=5)
                     if len(raw_articles) < MIN_ARTICLES:
-                        print("[Pipeline] Insufficient fresh articles (3-day window). Widening to 5 days...")
-                        raw_articles = fetch_articles_for_topics(list(all_topics_fallback), freshness_days=5)
+                        print("[Pipeline] Insufficient fresh articles (5-day window). Widening to 7 days...")
+                        raw_articles = fetch_articles_for_topics(list(all_topics_fallback), freshness_days=7)
 
                 user_raw = [a for a in raw_articles
                             if a.get("topic") in user_topics
