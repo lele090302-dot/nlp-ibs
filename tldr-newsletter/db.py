@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 DB_PATH = "data/users.db"
 os.makedirs("data", exist_ok=True)
@@ -51,6 +51,19 @@ def init_db():
             sent_at TEXT NOT NULL
         )
     """)
+
+    # Sent articles — tracks article URLs sent to each user for cross-edition deduplication
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS sent_articles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL,
+            article_url TEXT NOT NULL,
+            sent_at TEXT NOT NULL,
+            run_id TEXT,
+            UNIQUE(email, article_url)
+        )
+    """)
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_sent_articles_email ON sent_articles(email)")
 
     # Admin review queue — holds AI-ranked candidates awaiting editorial approval
     conn.execute("""
@@ -271,5 +284,43 @@ def clear_old_queues(keep_latest: int = 5):
     to_delete = run_ids[keep_latest:]
     for rid in to_delete:
         conn.execute("DELETE FROM review_queue WHERE run_id=?", (rid,))
+    conn.commit()
+    conn.close()
+
+
+# ── Sent articles (cross-edition deduplication) ───────────────────────────────
+
+def log_sent_articles(email: str, article_urls: list[str], run_id: str | None = None):
+    """Bulk insert sent article URLs for cross-edition deduplication.
+
+    Uses INSERT OR IGNORE so re-sending the same URL to the same user
+    is silently skipped (UNIQUE constraint on email + article_url).
+    """
+    conn = get_connection()
+    now = datetime.now(timezone.utc).isoformat()
+    for url in article_urls:
+        conn.execute(
+            "INSERT OR IGNORE INTO sent_articles (email, article_url, sent_at, run_id) VALUES (?, ?, ?, ?)",
+            (email, url, now, run_id),
+        )
+    conn.commit()
+    conn.close()
+
+
+def get_sent_article_urls(email: str) -> set[str]:
+    """Return all previously sent article URLs for a given user as a set for O(1) lookup."""
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT article_url FROM sent_articles WHERE email=?", (email,)
+    ).fetchall()
+    conn.close()
+    return {row["article_url"] for row in rows}
+
+
+def clean_old_sent_articles(days: int = 90):
+    """Delete sent_articles entries older than `days` to prevent unbounded DB growth."""
+    conn = get_connection()
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    conn.execute("DELETE FROM sent_articles WHERE sent_at < ?", (cutoff,))
     conn.commit()
     conn.close()

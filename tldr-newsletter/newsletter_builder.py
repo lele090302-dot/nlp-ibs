@@ -20,7 +20,7 @@ def build_feedback_url(base_url: str, email: str, article_url: str, article_sour
     return f"{base_url}/api/feedback?{params}"
 
 
-def build_html(user_name: str, user_email: str, topics: list[str], articles: list[dict]) -> str:
+def build_html(user_name: str, user_email: str, topics: list[str], articles: list[dict], max_bytes: int = 95000) -> str:
     """Render the newsletter HTML from the Jinja2 template."""
     env = Environment(loader=FileSystemLoader("templates"))
     template = env.get_template("newsletter.html")
@@ -42,7 +42,7 @@ def build_html(user_name: str, user_email: str, topics: list[str], articles: lis
     unsubscribe_url = f"{APP_BASE_URL}/api/unsubscribe?{urlencode({'email': user_email})}"
     preferences_url = f"{APP_BASE_URL}/#form"
 
-    return template.render(
+    html = template.render(
         user_name=user_name,
         topics=topics,
         articles=articles,
@@ -51,3 +51,18 @@ def build_html(user_name: str, user_email: str, topics: list[str], articles: lis
         preferences_url=preferences_url,
         logo_url=f"{APP_BASE_URL}/logo-beige.png",
     )
+
+    # Size guard: reduce articles if HTML exceeds Gmail clip limit
+    while len(html.encode('utf-8')) > max_bytes and len(articles) > 5:
+        articles = articles[:-1]  # Drop lowest-ranked (last) article
+        html = template.render(
+            user_name=user_name,
+            topics=topics,
+            articles=articles,
+            date=datetime.utcnow().strftime("%B %d, %Y"),
+            unsubscribe_url=unsubscribe_url,
+            preferences_url=preferences_url,
+            logo_url=f"{APP_BASE_URL}/logo-beige.png",
+        )
+
+    return html

@@ -26,6 +26,8 @@ from db import (
     get_latest_run_id,
     get_review_queue,
     clear_old_queues,
+    get_sent_article_urls,
+    log_sent_articles,
 )
 from fetcher import fetch_articles_for_topics
 from nlp_pipeline import process_articles, score_relevance, summarize_article, estimate_reading_time, RELEVANCE_THRESHOLD
@@ -43,7 +45,7 @@ REVIEW_POOL_SIZE = 15
 MIN_APPROVED_FOR_OVERRIDE = 1  # any approval triggers editorial mode
 
 # Article count constraints for the final newsletter
-MIN_ARTICLES = 8
+MIN_ARTICLES = 5
 MAX_ARTICLES = 10
 
 
@@ -70,7 +72,10 @@ def stage_pipeline(frequency_filter: str | None = None) -> str | None:
             all_topics.add(topic.strip())
 
     print(f"[Pipeline] Topics: {all_topics}")
-    raw_articles = fetch_articles_for_topics(list(all_topics))
+    raw_articles = fetch_articles_for_topics(list(all_topics), freshness_days=3)
+    if len(raw_articles) < MIN_ARTICLES:
+        print("[Pipeline] Insufficient fresh articles (3-day window). Widening to 5 days...")
+        raw_articles = fetch_articles_for_topics(list(all_topics), freshness_days=5)
     print(f"[Pipeline] Fetched {len(raw_articles)} raw articles.")
 
     # Score and filter globally (not per-user) for the admin queue
@@ -235,16 +240,21 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
         for user in users:
             for topic in user["topics"].split(","):
                 all_topics.add(topic.strip())
-        raw_articles = fetch_articles_for_topics(list(all_topics))
+        raw_articles = fetch_articles_for_topics(list(all_topics), freshness_days=3)
+        if len(raw_articles) < MIN_ARTICLES:
+            print("[Pipeline] Insufficient fresh articles (3-day window). Widening to 5 days...")
+            raw_articles = fetch_articles_for_topics(list(all_topics), freshness_days=5)
         # Exclude any articles that admin explicitly rejected
         if rejected_urls:
             raw_articles = [a for a in raw_articles if a.get("url") not in rejected_urls]
         print(f"[Pipeline] Fetched {len(raw_articles)} raw articles for AI fallback.")
 
     html_by_email: dict[str, str] = {}
+    articles_by_email: dict[str, list[str]] = {}
     for user in users:
         user_topics = [t.strip() for t in user["topics"].split(",")]
         feedback_boost = get_feedback_boost(user["email"])
+        sent_urls = get_sent_article_urls(user["email"])
 
         if use_admin_picks:
             # Start with approved articles filtered to this user's topics
@@ -263,7 +273,10 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
                     for u in users:
                         for t in u["topics"].split(","):
                             all_topics_fallback.add(t.strip())
-                    raw_articles = fetch_articles_for_topics(list(all_topics_fallback))
+                    raw_articles = fetch_articles_for_topics(list(all_topics_fallback), freshness_days=3)
+                    if len(raw_articles) < MIN_ARTICLES:
+                        print("[Pipeline] Insufficient fresh articles (3-day window). Widening to 5 days...")
+                        raw_articles = fetch_articles_for_topics(list(all_topics_fallback), freshness_days=5)
 
                 user_raw = [a for a in raw_articles
                             if a.get("topic") in user_topics
@@ -274,6 +287,7 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
                     user_topics,
                     top_n=MAX_ARTICLES - len(user_approved),
                     feedback_boost=feedback_boost,
+                    sent_urls=sent_urls,
                 )
                 user_approved += ai_padding
                 print(f"[Pipeline] Padded with {len(ai_padding)} AI picks to reach {MIN_ARTICLES}-{MAX_ARTICLES}.")
@@ -286,6 +300,7 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
                 user_topics,
                 top_n=MAX_ARTICLES,
                 feedback_boost=feedback_boost,
+                sent_urls=sent_urls,
             )
 
         print(f"[Pipeline] Building newsletter for {user['email']} ({len(enriched)} articles)")
@@ -296,9 +311,16 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
             articles=enriched,
         )
         html_by_email[user["email"]] = html
+        articles_by_email[user["email"]] = [a["url"] for a in enriched]
 
     print("\n[Pipeline] Sending emails via Amazon SES...")
     send_to_all_users(users, html_by_email, run_id=run_id)
+
+    # Log sent articles for cross-edition deduplication
+    for email, urls in articles_by_email.items():
+        if urls:
+            log_sent_articles(email, urls, run_id=run_id)
+
     print("\n[Pipeline] Done.")
 
 

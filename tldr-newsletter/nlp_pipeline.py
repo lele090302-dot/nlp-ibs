@@ -1,5 +1,8 @@
 import os
+import re
 import math
+from datetime import datetime, timezone
+from dateutil import parser as dateutil_parser
 from groq import Groq
 from sentence_transformers import SentenceTransformer, util
 from dotenv import load_dotenv
@@ -24,6 +27,31 @@ def get_embedder():
 
 
 # ── 1. Relevance Scoring ──────────────────────────────────────────────────────
+
+
+def _recency_decay(published_at: str, half_life_hours: float = 36.0) -> float:
+    """
+    Exponential decay: score_multiplier = 0.5 ^ (age_hours / half_life_hours)
+
+    Examples:
+      - 0 hours old  → multiplier = 1.0
+      - 36 hours old → multiplier = 0.5
+      - 72 hours old → multiplier = 0.25
+      - 5 days old   → multiplier ≈ 0.1
+
+    Returns 0.7 for unparseable dates (moderate penalty).
+    Returns 1.0 for age ≤ 0 hours.
+    """
+    try:
+        pub_dt = dateutil_parser.parse(published_at)
+        if pub_dt.tzinfo is None:
+            pub_dt = pub_dt.replace(tzinfo=timezone.utc)
+        age_hours = (datetime.now(timezone.utc) - pub_dt).total_seconds() / 3600
+        age_hours = max(0, age_hours)
+        return 0.5 ** (age_hours / half_life_hours)
+    except (ValueError, TypeError):
+        return 0.7
+
 
 TOPIC_DESCRIPTIONS = {
     "GenAI": "generative artificial intelligence, large language models, GPT, AI tools, machine learning breakthroughs",
@@ -53,12 +81,35 @@ def score_relevance(articles: list[dict], user_topics: list[str]) -> list[dict]:
         text = f"{article['title']}. {article['description']}"
         article_embedding = embedder.encode(text, convert_to_tensor=True)
         score = float(util.cos_sim(topic_embedding, article_embedding))
-        scored.append({**article, "relevance_score": round(score, 4)})
+        decay = _recency_decay(article.get("published_at", ""))
+        final_score = round(score * decay, 4)
+        scored.append({**article, "relevance_score": final_score})
 
     return sorted(scored, key=lambda x: x["relevance_score"], reverse=True)
 
 
 # ── 2. Summarization ──────────────────────────────────────────────────────────
+
+
+def _clean_summary(text: str) -> str:
+    """Strip markdown and ensure summary ends on a complete sentence."""
+    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # bold
+    text = re.sub(r'\*(.+?)\*', r'\1', text)      # italic
+    text = re.sub(r'#{1,6}\s*', '', text)          # headers
+    text = re.sub(r'`(.+?)`', r'\1', text)         # inline code
+    text = re.sub(r'^>\s*', '', text, flags=re.MULTILINE)  # blockquotes
+    text = re.sub(r'---+', '', text)               # horizontal rules
+    text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)  # links → text only
+
+    text = text.strip()
+
+    if text and text[-1] not in '.!?':
+        last_period = max(text.rfind('.'), text.rfind('!'), text.rfind('?'))
+        if last_period > 0:
+            text = text[:last_period + 1]
+
+    return text.strip()
+
 
 SUMMARIZE_PROMPT = """You are a concise newsletter writer for busy professionals.
 Summarize the following article in exactly 2-3 sentences. 
@@ -89,14 +140,14 @@ def summarize_article(article: dict) -> str:
                     ),
                 }
             ],
-            max_tokens=120,
+            max_tokens=250,
             temperature=0.4,
         )
-        return response.choices[0].message.content.strip()
+        return _clean_summary(response.choices[0].message.content.strip())
     except Exception as e:
         print(f"[NLP] Summarization error for '{article['title']}': {e}")
         # Fallback: return truncated description
-        return (article.get("description") or article["title"])[:200]
+        return _clean_summary((article.get("description") or article["title"])[:200])
 
 
 # ── 3. Reading Time Estimation ────────────────────────────────────────────────
@@ -202,21 +253,28 @@ def process_articles(
     articles: list[dict],
     user_topics: list[str],
     top_n: int = 10,
-    min_articles: int = 8,
+    min_articles: int = 5,
     feedback_boost: dict[str, float] | None = None,
+    sent_urls: set[str] | None = None,
 ) -> list[dict]:
     """
     Full NLP pipeline:
-    1. Score relevance for user topics
-    2. Apply relevance threshold — drop articles below RELEVANCE_THRESHOLD
-    3. Apply feedback boost — articles from sources the user liked rank higher
-    4. Pick top N articles (minimum min_articles, maximum top_n)
-    5. Summarize each
-    6. Estimate reading time
+    1. Filter out previously sent articles (cross-edition dedup)
+    2. Score relevance for user topics
+    3. Apply relevance threshold — drop articles below RELEVANCE_THRESHOLD
+    4. Apply feedback boost — articles from sources the user liked rank higher
+    5. Pick top N articles (minimum min_articles, maximum top_n)
+    6. Summarize each
+    7. Estimate reading time
     Returns enriched article dicts ready for the newsletter.
 
     feedback_boost: optional dict mapping article source name → boost value (e.g. {"TechCrunch": 0.05})
+    sent_urls: optional set of article URLs previously sent to this user (for deduplication)
     """
+    # Filter out previously sent articles early
+    if sent_urls:
+        articles = [a for a in articles if a.get("url") not in sent_urls]
+
     print(f"[NLP] Scoring {len(articles)} articles for relevance...")
     ranked = score_relevance(articles, user_topics)
 
@@ -229,12 +287,6 @@ def process_articles(
         print("[NLP] Warning: no articles passed the relevance threshold. Lowering threshold to 0.1 as fallback.")
         ranked = score_relevance(articles, user_topics)
         ranked = [a for a in ranked if a["relevance_score"] >= 0.1]
-
-    # If we still don't have enough articles after filtering, lower threshold further
-    if len(ranked) < min_articles:
-        print(f"[NLP] Warning: only {len(ranked)} articles after filtering, need at least {min_articles}. Lowering threshold to 0.05.")
-        ranked = score_relevance(articles, user_topics)
-        ranked = [a for a in ranked if a["relevance_score"] >= 0.05]
 
     # Apply feedback boost: bump score for sources the user has liked before
     if feedback_boost:
