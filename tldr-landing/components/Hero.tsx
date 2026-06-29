@@ -213,7 +213,7 @@ export default function Hero({ selectedTopics, onTopicsChange }: Props) {
           <div className="relative bg-white rounded-3xl overflow-hidden shadow-editorial border border-border">
             <div className="relative h-64 w-full">
               <Image
-                src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&q=80"
+                src="/hero-image.png"
                 alt="Editorial - morning newspaper with coffee"
                 fill
                 className="object-cover"
