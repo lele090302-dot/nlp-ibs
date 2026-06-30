@@ -14,8 +14,11 @@ Run both phases manually:
 """
 
 import os
+import logging
 import uuid
 from datetime import datetime, timezone
+
+logger = logging.getLogger(__name__)
 
 from db import (
     init_db,
@@ -45,7 +48,7 @@ REVIEW_POOL_SIZE = 15
 MIN_APPROVED_FOR_OVERRIDE = 1  # any approval triggers editorial mode
 
 # Article count constraints for the final newsletter
-MIN_ARTICLES = 5
+MIN_ARTICLES = 8
 MAX_ARTICLES = 10
 
 
@@ -302,6 +305,53 @@ def send_pipeline(run_id: str | None = None, frequency_filter: str | None = None
                 feedback_boost=feedback_boost,
                 sent_urls=sent_urls,
             )
+
+            # Post-filter freshness widening: if process_articles returns fewer than
+            # MIN_ARTICLES, widen freshness window and re-fetch/re-score
+            if len(enriched) < MIN_ARTICLES:
+                all_topics_widen: set[str] = set()
+                for u in users:
+                    for t in u["topics"].split(","):
+                        all_topics_widen.add(t.strip())
+
+                # Widen to 7 days
+                logger.info(f"[Pipeline] Post-filter count ({len(enriched)}) < {MIN_ARTICLES} for {user['email']}. Widening freshness to 7 days...")
+                widened_articles = fetch_articles_for_topics(list(all_topics_widen), freshness_days=7)
+                if rejected_urls:
+                    widened_articles = [a for a in widened_articles if a.get("url") not in rejected_urls]
+                user_widened = [a for a in widened_articles if a.get("topic") in user_topics]
+                enriched = process_articles(
+                    user_widened,
+                    user_topics,
+                    top_n=MAX_ARTICLES,
+                    feedback_boost=feedback_boost,
+                    sent_urls=sent_urls,
+                )
+
+                # If still insufficient, widen to 10 days
+                if len(enriched) < MIN_ARTICLES:
+                    logger.info(f"[Pipeline] Post-filter count ({len(enriched)}) still < {MIN_ARTICLES} for {user['email']}. Widening freshness to 10 days...")
+                    widened_articles = fetch_articles_for_topics(list(all_topics_widen), freshness_days=10)
+                    if rejected_urls:
+                        widened_articles = [a for a in widened_articles if a.get("url") not in rejected_urls]
+                    user_widened = [a for a in widened_articles if a.get("topic") in user_topics]
+                    enriched = process_articles(
+                        user_widened,
+                        user_topics,
+                        top_n=MAX_ARTICLES,
+                        feedback_boost=feedback_boost,
+                        sent_urls=sent_urls,
+                    )
+
+            # Alert logging when minimum still cannot be met after all fallback strategies
+            if len(enriched) < MIN_ARTICLES:
+                logger.warning(
+                    f"[Pipeline] ALERT: Unable to meet minimum article target. "
+                    f"Final count: {len(enriched)}, minimum target: {MIN_ARTICLES}, "
+                    f"strategies attempted: [threshold cascade, freshness widening 5->7->10 days], "
+                    f"subscriber: {user['email']}, topics: {user_topics}. "
+                    f"Delivering all {len(enriched)} available articles."
+                )
 
         print(f"[Pipeline] Building newsletter for {user['email']} ({len(enriched)} articles)")
         html = build_html(

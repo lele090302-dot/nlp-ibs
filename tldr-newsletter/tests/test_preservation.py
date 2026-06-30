@@ -17,6 +17,10 @@ import pytest
 from hypothesis import given, settings, assume, HealthCheck
 from hypothesis import strategies as st
 
+# Constants matching the pipeline
+RELEVANCE_THRESHOLD = 0.2
+MAX_ARTICLES = 10
+
 # Add parent directory to path so we can import the modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -469,3 +473,365 @@ def test_well_formed_summary_passes_through_unchanged(summary):
         f"Input:  '{summary}'\n"
         f"Output: '{cleaned}'"
     )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PROCESS_ARTICLES PIPELINE-LEVEL PRESERVATION PROPERTIES
+#
+# These tests exercise the full process_articles() pipeline with mocked
+# score_relevance and summarize_article, verifying that when the article pool
+# is SUFFICIENT (≥8 above threshold), the pipeline preserves:
+#   - MAX_ARTICLES (10) cap
+#   - Quality filtering (no below-threshold articles)
+#   - Cross-edition dedup (sent_urls excluded)
+#   - Balanced topic distribution (each topic gets fair slots)
+#
+# **Validates: Requirements 3.1, 3.2, 3.3, 3.5**
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+def _mock_score_relevance(articles, user_topics):
+    """
+    Return articles with relevance_score set from _assigned_score field.
+    Sorted descending by score (matching real score_relevance behavior).
+    """
+    scored = []
+    for article in articles:
+        score = article.get("_assigned_score", 0.5)
+        scored.append({**article, "relevance_score": score})
+    return sorted(scored, key=lambda x: x["relevance_score"], reverse=True)
+
+
+# ─── Strategies for pipeline-level tests ──────────────────────────────────────
+
+@st.composite
+def abundant_pool_strategy(draw):
+    """
+    Generate article sets where 15+ articles score above threshold.
+    Tests MAX_ARTICLES cap enforcement.
+    """
+    num_articles = draw(st.integers(min_value=15, max_value=25))
+    topic = draw(st.sampled_from(VALID_TOPICS))
+
+    articles = []
+    for i in range(num_articles):
+        # All articles well above threshold
+        score = draw(st.floats(min_value=0.3, max_value=0.95, allow_nan=False, allow_infinity=False))
+        articles.append({
+            "title": f"High-quality article {i}",
+            "description": f"Excellent content about {topic} number {i}",
+            "topic": topic,
+            "source": draw(st.sampled_from(["TechCrunch", "Bloomberg", "Reuters", "Verge", "Ars Technica"])),
+            "url": f"https://example.com/abundant-{i}-{draw(st.integers(min_value=1000, max_value=99999))}",
+            "published_at": "2025-01-01T10:00:00Z",
+            "_assigned_score": round(score, 4),
+        })
+
+    return articles, [topic]
+
+
+@st.composite
+def sufficient_pool_strategy(draw, min_above_threshold=8, max_articles=18):
+    """
+    Generate article sets where at least min_above_threshold articles
+    have pre-assigned scores above RELEVANCE_THRESHOLD (0.2).
+    """
+    num_articles = draw(st.integers(min_value=min_above_threshold, max_value=max_articles))
+    topic = draw(st.sampled_from(VALID_TOPICS))
+
+    articles = []
+    above_count = 0
+    for i in range(num_articles):
+        if above_count < min_above_threshold:
+            score = draw(st.floats(min_value=0.25, max_value=0.95, allow_nan=False, allow_infinity=False))
+            above_count += 1
+        else:
+            score = draw(st.floats(min_value=0.05, max_value=0.95, allow_nan=False, allow_infinity=False))
+            if score >= RELEVANCE_THRESHOLD:
+                above_count += 1
+
+        articles.append({
+            "title": f"Article {i} about {topic}",
+            "description": f"Description of article {i} covering {topic}",
+            "topic": topic,
+            "source": draw(st.sampled_from(["TechCrunch", "Bloomberg", "Reuters", "Verge", "Ars Technica"])),
+            "url": f"https://example.com/article-{i}-{draw(st.integers(min_value=1000, max_value=99999))}",
+            "published_at": "2025-01-01T10:00:00Z",
+            "_assigned_score": round(score, 4),
+        })
+
+    return articles, [topic]
+
+
+@st.composite
+def dedup_sufficient_pool_strategy(draw):
+    """
+    Generate article sets with some previously-sent URLs, where
+    the remaining pool (after dedup) still has ≥8 articles above threshold.
+    """
+    num_sent = draw(st.integers(min_value=2, max_value=5))
+    num_fresh = draw(st.integers(min_value=10, max_value=15))
+    topic = draw(st.sampled_from(VALID_TOPICS))
+
+    sent_urls = set()
+    articles = []
+
+    # Articles that will be deduped (sent previously)
+    for i in range(num_sent):
+        url = f"https://example.com/sent-{i}-{draw(st.integers(min_value=1000, max_value=99999))}"
+        sent_urls.add(url)
+        articles.append({
+            "title": f"Previously sent article {i}",
+            "description": f"Old content about {topic}",
+            "topic": topic,
+            "source": "TechCrunch",
+            "url": url,
+            "published_at": "2025-01-01T10:00:00Z",
+            "_assigned_score": 0.8,  # High score but should still be excluded
+        })
+
+    # Fresh articles (all above threshold)
+    for i in range(num_fresh):
+        score = draw(st.floats(min_value=0.3, max_value=0.9, allow_nan=False, allow_infinity=False))
+        articles.append({
+            "title": f"Fresh article {i}",
+            "description": f"New content about {topic} item {i}",
+            "topic": topic,
+            "source": draw(st.sampled_from(["TechCrunch", "Bloomberg", "Reuters", "Verge"])),
+            "url": f"https://example.com/fresh-{i}-{draw(st.integers(min_value=1000, max_value=99999))}",
+            "published_at": "2025-01-01T10:00:00Z",
+            "_assigned_score": round(score, 4),
+        })
+
+    return articles, [topic], sent_urls
+
+
+@st.composite
+def multi_topic_sufficient_strategy(draw):
+    """
+    Generate multi-topic article sets with sufficient pool per topic.
+    Each topic gets enough high-scoring articles for balanced distribution.
+    """
+    num_topics = draw(st.integers(min_value=2, max_value=4))
+    topics = draw(st.lists(
+        st.sampled_from(VALID_TOPICS),
+        min_size=num_topics,
+        max_size=num_topics,
+        unique=True,
+    ))
+
+    articles_per_topic = draw(st.integers(min_value=4, max_value=8))
+
+    articles = []
+    for topic in topics:
+        for j in range(articles_per_topic):
+            score = draw(st.floats(min_value=0.3, max_value=0.9, allow_nan=False, allow_infinity=False))
+            articles.append({
+                "title": f"Article about {topic} #{j}",
+                "description": f"Content covering {topic} developments item {j}",
+                "topic": topic,
+                "source": draw(st.sampled_from(["TechCrunch", "Bloomberg", "Reuters", "Verge"])),
+                "url": f"https://example.com/{topic.lower()}-{j}-{draw(st.integers(min_value=1000, max_value=99999))}",
+                "published_at": "2025-01-01T10:00:00Z",
+                "_assigned_score": round(score, 4),
+            })
+
+    return articles, topics
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Property 2.5: MAX_ARTICLES Cap Enforcement
+#
+# For all article sets where ≥8 pass threshold, result length ≤ MAX_ARTICLES (10)
+#
+# **Validates: Requirements 3.1**
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@given(data=abundant_pool_strategy())
+@settings(
+    max_examples=30,
+    suppress_health_check=[HealthCheck.too_slow],
+    deadline=None,
+)
+def test_pipeline_max_articles_cap_enforced(data):
+    """
+    Property 2.5: For all article sets where ≥8 pass threshold,
+    result length ≤ MAX_ARTICLES (10).
+
+    When the pool is abundant (15+ above threshold), process_articles
+    must cap output at MAX_ARTICLES regardless of how many are available.
+
+    **Validates: Requirements 3.1**
+    """
+    articles, topics = data
+
+    with patch("nlp_pipeline.score_relevance", side_effect=_mock_score_relevance), \
+         patch("nlp_pipeline.summarize_article", return_value="Test summary for article."):
+
+        from nlp_pipeline import process_articles
+        result = process_articles(
+            articles=articles,
+            user_topics=topics,
+            top_n=MAX_ARTICLES,
+        )
+
+    assert len(result) <= MAX_ARTICLES, (
+        f"Result contains {len(result)} articles, exceeding MAX_ARTICLES ({MAX_ARTICLES}). "
+        f"Input had {len(articles)} articles."
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Property 2.6: Quality Filtering — No Below-Threshold Articles
+#
+# For all article sets where ≥8 pass threshold, no article in result
+# has relevance_score < RELEVANCE_THRESHOLD
+#
+# **Validates: Requirements 3.2**
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@given(data=sufficient_pool_strategy(min_above_threshold=8, max_articles=18))
+@settings(
+    max_examples=30,
+    suppress_health_check=[HealthCheck.too_slow],
+    deadline=None,
+)
+def test_pipeline_no_below_threshold_articles_when_sufficient(data):
+    """
+    Property 2.6: For all article sets where ≥8 pass threshold,
+    no article in result has relevance_score < RELEVANCE_THRESHOLD.
+
+    When the pool is sufficient, low-scoring articles should still be
+    filtered out to maintain newsletter quality.
+
+    **Validates: Requirements 3.2**
+    """
+    articles, topics = data
+
+    with patch("nlp_pipeline.score_relevance", side_effect=_mock_score_relevance), \
+         patch("nlp_pipeline.summarize_article", return_value="Test summary for article."):
+
+        from nlp_pipeline import process_articles
+        result = process_articles(
+            articles=articles,
+            user_topics=topics,
+            top_n=MAX_ARTICLES,
+        )
+
+    for article in result:
+        assert article["relevance_score"] >= RELEVANCE_THRESHOLD, (
+            f"Article '{article['title']}' has score {article['relevance_score']} "
+            f"which is below RELEVANCE_THRESHOLD ({RELEVANCE_THRESHOLD}). "
+            f"When pool is sufficient, low-relevance articles should be excluded."
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Property 2.7: Cross-Edition Dedup — Sent URLs Excluded
+#
+# For all article sets where ≥8 pass threshold AND sent_urls provided,
+# no previously-sent URL appears in result
+#
+# **Validates: Requirements 3.3**
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@given(data=dedup_sufficient_pool_strategy())
+@settings(
+    max_examples=30,
+    suppress_health_check=[HealthCheck.too_slow],
+    deadline=None,
+)
+def test_pipeline_sent_urls_excluded_when_sufficient(data):
+    """
+    Property 2.7: For all article sets where ≥8 pass threshold AND sent_urls
+    provided, no previously-sent URL appears in result.
+
+    When remaining pool after dedup is ≥8, cross-edition dedup must
+    continue to exclude previously sent articles.
+
+    **Validates: Requirements 3.3**
+    """
+    articles, topics, sent_urls = data
+
+    with patch("nlp_pipeline.score_relevance", side_effect=_mock_score_relevance), \
+         patch("nlp_pipeline.summarize_article", return_value="Test summary for article."):
+
+        from nlp_pipeline import process_articles
+        result = process_articles(
+            articles=articles,
+            user_topics=topics,
+            top_n=MAX_ARTICLES,
+            sent_urls=sent_urls,
+        )
+
+    result_urls = {a["url"] for a in result}
+    duplicates = result_urls & sent_urls
+
+    assert not duplicates, (
+        f"Previously-sent URLs {duplicates} appear in result. "
+        f"Cross-edition dedup should exclude sent_urls when pool is sufficient."
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Property 2.8: Balanced Topic Distribution — Minimum Slots Per Topic
+#
+# For all multi-topic article sets with sufficient pool, each topic gets
+# at least floor(top_n / num_topics) slots
+#
+# **Validates: Requirements 3.5**
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@given(data=multi_topic_sufficient_strategy())
+@settings(
+    max_examples=30,
+    suppress_health_check=[HealthCheck.too_slow],
+    deadline=None,
+)
+def test_pipeline_balanced_distribution_minimum_slots(data):
+    """
+    Property 2.8: For all multi-topic article sets with sufficient pool,
+    each topic gets at least floor(top_n / num_topics) slots.
+
+    When pool is sufficient across all topics, balanced distribution
+    should give each topic a fair share of available slots.
+
+    **Validates: Requirements 3.5**
+    """
+    articles, topics = data
+    num_topics = len(topics)
+
+    with patch("nlp_pipeline.score_relevance", side_effect=_mock_score_relevance), \
+         patch("nlp_pipeline.summarize_article", return_value="Test summary for article."):
+
+        from nlp_pipeline import process_articles
+        result = process_articles(
+            articles=articles,
+            user_topics=topics,
+            top_n=MAX_ARTICLES,
+        )
+
+    # Count topic distribution in result
+    topic_counts = {}
+    for article in result:
+        t = article.get("topic", "unknown")
+        topic_counts[t] = topic_counts.get(t, 0) + 1
+
+    # Each topic should get at least floor(top_n / num_topics) slots
+    # (capped by what's actually available for that topic above threshold)
+    expected_min_per_topic = MAX_ARTICLES // num_topics
+
+    for topic in topics:
+        count = topic_counts.get(topic, 0)
+        available_for_topic = sum(
+            1 for a in articles
+            if a.get("topic") == topic and a.get("_assigned_score", 0) >= RELEVANCE_THRESHOLD
+        )
+        effective_min = min(expected_min_per_topic, available_for_topic)
+
+        assert count >= effective_min, (
+            f"Topic '{topic}' got {count} slots, expected at least {effective_min} "
+            f"(floor({MAX_ARTICLES}/{num_topics})={expected_min_per_topic}, "
+            f"available={available_for_topic}). "
+            f"Balanced distribution should allocate fairly across topics."
+        )

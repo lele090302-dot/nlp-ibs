@@ -1,10 +1,13 @@
 import os
+import logging
 import requests
 import feedparser
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta, timezone
 from dateutil import parser as dateutil_parser
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -15,29 +18,23 @@ RSS_FEEDS = {
     "GenAI": [
         "https://feeds.feedburner.com/venturebeat/SZYF",  # VentureBeat AI
         "https://techcrunch.com/category/artificial-intelligence/feed/",
-        "https://arstechnica.com/ai/",
-        "https://www.bloomberg.com/ai",
+        "https://arstechnica.com/ai/feed/",
     ],
     "Fintech": [
         "https://www.finextra.com/rss/headlines.aspx",
         "https://techcrunch.com/category/fintech/feed/",
-        "https://fintechmagazine.com/fintech",
     ],
     "Tech": [
         "https://feeds.feedburner.com/TechCrunch",
         "https://www.theverge.com/rss/index.xml",
-        "https://arstechnica.com/gadgets/",
-        "https://www.bloomberg.com/technology",
-        "https://www.wsj.com/tech/ai",
+        "https://arstechnica.com/gadgets/feed/",
     ],
     "Startups": [
         "https://techcrunch.com/category/startups/feed/",
-        "https://www.bloomberg.com/technology/startups",
     ],
     "Crypto": [
         "https://cointelegraph.com/rss",
         "https://decrypt.co/feed",
-        "https://fintechmagazine.com/crypto",
     ],
 }
 
@@ -98,9 +95,31 @@ def fetch_from_rss(topic: str, max_per_feed: int = 10, freshness_days: int = 5) 
 
     for feed_url in feeds:
         try:
-            feed = feedparser.parse(feed_url)
+            response = requests.get(feed_url, timeout=10)
+            response.raise_for_status()
+            feed = feedparser.parse(response.content)
+
+            # Bozo flag checking
+            if feed.bozo:
+                if len(feed.entries) == 0:
+                    logger.warning(
+                        f"[RSS] Malformed feed with no entries, skipping: {feed_url} "
+                        f"(bozo_exception: {feed.bozo_exception})"
+                    )
+                    continue
+                else:
+                    logger.warning(
+                        f"[RSS] Malformed feed but has entries, continuing: {feed_url} "
+                        f"(bozo_exception: {feed.bozo_exception})"
+                    )
+
             for entry in feed.entries[:max_per_feed]:
-                pub_date_str = entry.get("published", "")
+                # Entry title/URL validation
+                if not entry.get("title") or not entry.get("link"):
+                    continue
+
+                # Date field fallback for Atom feeds
+                pub_date_str = entry.get("published") or entry.get("updated", "")
                 if pub_date_str:
                     try:
                         pub_date = dateutil_parser.parse(pub_date_str)
@@ -120,8 +139,12 @@ def fetch_from_rss(topic: str, max_per_feed: int = 10, freshness_days: int = 5) 
                     "content": entry.get("summary", "") or "",
                     "topic": topic,
                 })
+        except requests.exceptions.Timeout:
+            logger.warning(f"[RSS] Timeout fetching {feed_url} (10s limit exceeded)")
+        except requests.exceptions.RequestException as e:
+            logger.warning(f"[RSS] Error fetching {feed_url}: {e}")
         except Exception as e:
-            print(f"[RSS] Error fetching {feed_url}: {e}")
+            logger.warning(f"[RSS] Unexpected error processing {feed_url}: {e}")
 
     return articles
 

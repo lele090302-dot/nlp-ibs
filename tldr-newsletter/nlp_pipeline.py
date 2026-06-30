@@ -1,12 +1,15 @@
 import os
 import re
 import math
+import logging
 from datetime import datetime, timezone
 from dateutil import parser as dateutil_parser
 from groq import Groq
 from sentence_transformers import SentenceTransformer, util
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -55,11 +58,59 @@ def _recency_decay(published_at: str, half_life_hours: float = 36.0) -> float:
 
 
 TOPIC_DESCRIPTIONS = {
-    "GenAI": "generative artificial intelligence, large language models, GPT, AI tools, machine learning breakthroughs",
-    "Fintech": "financial technology, digital banking, payments, neobanks, open banking, insurtech",
-    "Tech": "technology industry, software, hardware, big tech companies, product launches",
-    "Startups": "startup ecosystem, venture capital, funding rounds, entrepreneurship, new companies",
-    "Crypto": "cryptocurrency, bitcoin, ethereum, blockchain, decentralized finance, NFTs, web3",
+    "GenAI": (
+        "Generative AI and large language models: ChatGPT, Claude, Gemini, Copilot, "
+        "foundation models, multimodal and diffusion models, AI agents, prompt engineering, "
+        "model training and benchmarks, AI safety and alignment, AI chips and compute. "
+        "OpenAI, Anthropic, Google DeepMind, Mistral, Meta AI, Cohere, open-source models, "
+        "Llama, Falcon, fine-tuning, RLHF, RAG, retrieval-augmented generation, "
+        "AI coding assistants, text-to-image, Stable Diffusion, Midjourney, DALL-E, "
+        "transformer architecture, inference optimization, quantization, edge AI, "
+        "AI regulation, AI startups, AI infrastructure and tooling."
+    ),
+    "Fintech": (
+        "Financial technology and digital finance: neobanks, challenger banks, "
+        "payments and payment infrastructure (Stripe, Plaid, Adyen, Square), "
+        "buy now pay later (Klarna, Affirm), open banking and banking APIs, "
+        "embedded finance, lending platforms and credit, insurtech, regtech, "
+        "robo-advisors and wealth management, digital wallets, cross-border payments, "
+        "financial inclusion, bank partnerships and banking-as-a-service. "
+        "Wise, Revolut, Chime, Robinhood, SoFi, Nubank, trading platforms, "
+        "payroll tech, treasury management, financial APIs, fraud detection, "
+        "KYC and identity verification, merchant services, point-of-sale, "
+        "personal finance apps, budgeting tools, credit scoring, "
+        "financial data aggregation, stock trading, investment apps."
+    ),
+    "Tech": (
+        "Technology industry news: major tech companies like Apple, Google, Microsoft, "
+        "Amazon, Meta, cloud computing, semiconductors and chips, consumer electronics, "
+        "enterprise software and SaaS, cybersecurity, product launches and earnings. "
+        "Nvidia, TSMC, Intel, AMD, data centers, networking, 5G, quantum computing, "
+        "AR/VR, wearables, smart home, IoT, robotics, autonomous vehicles, "
+        "open source software, developer tools, programming languages, "
+        "tech layoffs, tech earnings, antitrust, app stores, social media platforms, "
+        "streaming services, gaming, hardware reviews, tech policy and regulation."
+    ),
+    "Startups": (
+        "Startup ecosystem and venture capital: seed, Series A/B/C funding rounds, venture "
+        "capital firms, unicorns, IPOs, acquisitions and M&A, accelerators like Y Combinator, "
+        "founders, pitch decks, valuations, entrepreneurship. "
+        "Bootstrapping, incubators, 500 Startups, Techstars, Sequoia, Andreessen Horowitz, "
+        "pre-seed, growth stage, cap tables, term sheets, startup failures, pivots, "
+        "demo day, angel investors, convertible notes, SAFEs, startup layoffs, "
+        "founder stories, product-market fit, scaling, go-to-market strategy, "
+        "startup acquisitions, SPACs, direct listings, venture debt."
+    ),
+    "Crypto": (
+        "Cryptocurrency and blockchain: Bitcoin, Ethereum, Solana and other chains, "
+        "decentralized finance (DeFi), NFTs, web3, stablecoins, DAOs, crypto exchanges, "
+        "crypto regulation and SEC actions, mining, wallets. "
+        "Bitcoin ETF, Coinbase, Binance, Kraken, layer-2 scaling, rollups, "
+        "zero-knowledge proofs, ZK-SNARKs, memecoins, airdrops, gas fees, "
+        "Ethereum staking, proof of stake, smart contracts, tokenization, "
+        "real-world assets on chain, cross-chain bridges, DeFi protocols, "
+        "crypto custody, institutional crypto adoption, CBDC, digital currencies."
+    ),
 }
 
 
@@ -256,7 +307,7 @@ def process_articles(
     articles: list[dict],
     user_topics: list[str],
     top_n: int = 10,
-    min_articles: int = 5,
+    min_articles: int = 8,
     feedback_boost: dict[str, float] | None = None,
     sent_urls: set[str] | None = None,
 ) -> list[dict]:
@@ -265,10 +316,11 @@ def process_articles(
     1. Filter out previously sent articles (cross-edition dedup)
     2. Score relevance for user topics
     3. Apply relevance threshold — drop articles below RELEVANCE_THRESHOLD
-    4. Apply feedback boost — articles from sources the user liked rank higher
-    5. Pick top N articles (minimum min_articles, maximum top_n)
-    6. Summarize each
-    7. Estimate reading time
+    4. Progressive threshold cascade if filtered count < min_articles
+    5. Apply feedback boost — articles from sources the user liked rank higher
+    6. Pick top N articles (minimum min_articles, maximum top_n)
+    7. Summarize each
+    8. Estimate reading time
     Returns enriched article dicts ready for the newsletter.
 
     feedback_boost: optional dict mapping article source name → boost value (e.g. {"TechCrunch": 0.05})
@@ -279,17 +331,28 @@ def process_articles(
         articles = [a for a in articles if a.get("url") not in sent_urls]
 
     print(f"[NLP] Scoring {len(articles)} articles for relevance...")
-    ranked = score_relevance(articles, user_topics)
+    scored = score_relevance(articles, user_topics)
 
     # Filter out articles below the relevance threshold
-    before_filter = len(ranked)
-    ranked = [a for a in ranked if a["relevance_score"] >= RELEVANCE_THRESHOLD]
-    print(f"[NLP] Threshold filter ({RELEVANCE_THRESHOLD}): {before_filter} → {len(ranked)} articles kept.")
+    before_filter = len(scored)
+    filtered = [a for a in scored if a["relevance_score"] >= RELEVANCE_THRESHOLD]
+    print(f"[NLP] Threshold filter ({RELEVANCE_THRESHOLD}): {before_filter} → {len(filtered)} articles kept.")
 
-    if not ranked:
-        print("[NLP] Warning: no articles passed the relevance threshold. Lowering threshold to 0.1 as fallback.")
-        ranked = score_relevance(articles, user_topics)
-        ranked = [a for a in ranked if a["relevance_score"] >= 0.1]
+    # Progressive threshold cascade: if filtered count < min_articles, progressively
+    # lower the threshold to include more articles from the full scored list.
+    if len(filtered) < min_articles:
+        cascade_thresholds = [0.15, 0.10, 0.05]
+        for threshold in cascade_thresholds:
+            if len(filtered) >= min_articles:
+                break
+            filtered = [a for a in scored if a["relevance_score"] >= threshold]
+            logger.info(f"[NLP] Cascade: lowered threshold to {threshold}, now {len(filtered)} articles pass")
+        # Final fallback: include all scored articles regardless of threshold
+        if len(filtered) < min_articles:
+            filtered = list(scored)
+            logger.info(f"[NLP] Cascade: including all {len(filtered)} scored articles (no threshold)")
+
+    ranked = filtered
 
     # Apply feedback boost: bump score for sources the user has liked before
     if feedback_boost:
