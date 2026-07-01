@@ -61,10 +61,10 @@ export default function Stories() {
         {/* Header */}
         <div className="mb-12">
           <p className="text-xs font-sans font-semibold uppercase tracking-widest text-terracotta mb-3">
-            Today&apos;s Edition
+            Latest Edition
           </p>
           <h2 className="font-serif text-4xl md:text-5xl text-charcoal">
-            Top stories, ranked.
+            Top stories.
           </h2>
         </div>
 
@@ -89,11 +89,14 @@ export default function Stories() {
 
             {/* Quote card */}
             <div className="rounded-2xl border border-border bg-white p-6 shadow-card">
+              <p className="font-serif text-lg italic text-charcoal leading-snug mb-1">
+                &ldquo;Information is abundant.
+              </p>
               <p className="font-serif text-lg italic text-charcoal leading-snug mb-3">
-                &ldquo;Information is abundant. Clarity is rare.&rdquo;
+                Clarity is rare.&rdquo;
               </p>
               <p className="font-sans text-xs text-muted uppercase tracking-widest">
-                - The TL;DR Principle
+                — The TL;DR Principle
               </p>
             </div>
           </aside>
