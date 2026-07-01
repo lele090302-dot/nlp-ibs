@@ -40,7 +40,7 @@ sys.modules.setdefault("groq", _mock_groq)
 # VALID_TOPICS used across tests
 # ═══════════════════════════════════════════════════════════════════════════════
 
-VALID_TOPICS = ["GenAI", "Fintech", "Tech", "Startups", "Crypto"]
+VALID_TOPICS = ["AI", "Fintech", "Tech", "Startups", "Crypto"]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -666,7 +666,9 @@ def test_pipeline_max_articles_cap_enforced(data):
     articles, topics = data
 
     with patch("nlp_pipeline.score_relevance", side_effect=_mock_score_relevance), \
-         patch("nlp_pipeline.summarize_article", return_value="Test summary for article."):
+         patch("nlp_pipeline.summarize_article", return_value="Test summary for article."), \
+         patch("nlp_pipeline.rephrase_title", side_effect=lambda a: {**a, "original_title": a["title"]}), \
+         patch("nlp_pipeline._fetch_full_article_text", return_value=""):
 
         from nlp_pipeline import process_articles
         result = process_articles(
@@ -709,7 +711,9 @@ def test_pipeline_no_below_threshold_articles_when_sufficient(data):
     articles, topics = data
 
     with patch("nlp_pipeline.score_relevance", side_effect=_mock_score_relevance), \
-         patch("nlp_pipeline.summarize_article", return_value="Test summary for article."):
+         patch("nlp_pipeline.summarize_article", return_value="Test summary for article."), \
+         patch("nlp_pipeline.rephrase_title", side_effect=lambda a: {**a, "original_title": a["title"]}), \
+         patch("nlp_pipeline._fetch_full_article_text", return_value=""):
 
         from nlp_pipeline import process_articles
         result = process_articles(
@@ -754,7 +758,9 @@ def test_pipeline_sent_urls_excluded_when_sufficient(data):
     articles, topics, sent_urls = data
 
     with patch("nlp_pipeline.score_relevance", side_effect=_mock_score_relevance), \
-         patch("nlp_pipeline.summarize_article", return_value="Test summary for article."):
+         patch("nlp_pipeline.summarize_article", return_value="Test summary for article."), \
+         patch("nlp_pipeline.rephrase_title", side_effect=lambda a: {**a, "original_title": a["title"]}), \
+         patch("nlp_pipeline._fetch_full_article_text", return_value=""):
 
         from nlp_pipeline import process_articles
         result = process_articles(
@@ -802,7 +808,9 @@ def test_pipeline_balanced_distribution_minimum_slots(data):
     num_topics = len(topics)
 
     with patch("nlp_pipeline.score_relevance", side_effect=_mock_score_relevance), \
-         patch("nlp_pipeline.summarize_article", return_value="Test summary for article."):
+         patch("nlp_pipeline.summarize_article", return_value="Test summary for article."), \
+         patch("nlp_pipeline.rephrase_title", side_effect=lambda a: {**a, "original_title": a["title"]}), \
+         patch("nlp_pipeline._fetch_full_article_text", return_value=""):
 
         from nlp_pipeline import process_articles
         result = process_articles(

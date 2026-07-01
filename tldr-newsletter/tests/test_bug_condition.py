@@ -172,6 +172,8 @@ class TestMinimumArticleDeliveryGuarantee:
 
         with patch("nlp_pipeline.score_relevance", side_effect=mock_score_relevance), \
              patch("nlp_pipeline.summarize_article", side_effect=mock_summarize), \
+             patch("nlp_pipeline.rephrase_title", side_effect=lambda a: {**a, "original_title": a["title"]}), \
+             patch("nlp_pipeline._fetch_full_article_text", return_value=""), \
              patch("logging.warning", side_effect=capture_alert):
 
             result = process_articles(
@@ -249,7 +251,9 @@ class TestMinimumArticleDeliveryGuarantee:
             return "Test summary."
 
         with patch("nlp_pipeline.score_relevance", side_effect=mock_score_relevance), \
-             patch("nlp_pipeline.summarize_article", side_effect=mock_summarize):
+             patch("nlp_pipeline.summarize_article", side_effect=mock_summarize), \
+             patch("nlp_pipeline.rephrase_title", side_effect=lambda a: {**a, "original_title": a["title"]}), \
+             patch("nlp_pipeline._fetch_full_article_text", return_value=""):
 
             result = process_articles(
                 articles=all_articles,

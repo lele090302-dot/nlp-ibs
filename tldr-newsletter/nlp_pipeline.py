@@ -4,6 +4,7 @@ import math
 import logging
 from datetime import datetime, timezone
 from dateutil import parser as dateutil_parser
+import requests
 from groq import Groq
 from sentence_transformers import SentenceTransformer, util
 from bs4 import BeautifulSoup
@@ -58,8 +59,8 @@ def _recency_decay(published_at: str, half_life_hours: float = 36.0) -> float:
 
 
 TOPIC_DESCRIPTIONS = {
-    "GenAI": (
-        "Generative AI and large language models: ChatGPT, Claude, Gemini, Copilot, "
+    "AI": (
+        "Artificial intelligence and large language models: ChatGPT, Claude, Gemini, Copilot, "
         "foundation models, multimodal and diffusion models, AI agents, prompt engineering, "
         "model training and benchmarks, AI safety and alignment, AI chips and compute. "
         "OpenAI, Anthropic, Google DeepMind, Mistral, Meta AI, Cohere, open-source models, "
@@ -143,6 +144,23 @@ def score_relevance(articles: list[dict], user_topics: list[str]) -> list[dict]:
 # ── 2. Summarization ──────────────────────────────────────────────────────────
 
 
+def _clean_title_fallback(title: str) -> str:
+    """Strip HTML and markdown from a title string. No other modifications."""
+    # Strip HTML tags using BeautifulSoup
+    title = BeautifulSoup(title, "html.parser").get_text(separator=" ")
+    # Strip markdown formatting (same pattern as _clean_summary)
+    title = re.sub(r'\*\*(.+?)\*\*', r'\1', title)  # bold
+    title = re.sub(r'\*(.+?)\*', r'\1', title)      # italic
+    title = re.sub(r'#{1,6}\s*', '', title)          # headers
+    title = re.sub(r'`(.+?)`', r'\1', title)         # inline code
+    title = re.sub(r'^>\s*', '', title, flags=re.MULTILINE)  # blockquotes
+    title = re.sub(r'---+', '', title)               # horizontal rules
+    title = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', title)  # links → text only
+    # Collapse multiple whitespace into single space
+    title = re.sub(r'\s+', ' ', title)
+    return title.strip()
+
+
 def _clean_summary(text: str) -> str:
     """Strip markdown and ensure summary ends on a complete sentence."""
     text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # bold
@@ -204,9 +222,96 @@ def summarize_article(article: dict) -> str:
         return _clean_summary(fallback[:200])
 
 
+# ── 2b. Title Rephrasing Helpers ───────────────────────────────────────────────
+
+
+REPHRASE_TITLE_PROMPT = """Rewrite the following article headline.
+
+Rules:
+- Maximum 100 characters
+- Crisp, catchy, and engaging for an academically-minded audience
+- No clickbait, no sensationalized language, no ALL CAPS, no tabloid style
+- No jargon or abbreviations — expand any acronym that is not universally known
+- Preserve the factual meaning: named entities, numbers, and the core claim must remain
+- Output ONLY the rewritten headline, nothing else
+
+Original headline: {title}
+
+Rewritten headline:"""
+
+
+def _truncate_at_word_boundary(text: str, max_len: int = 100) -> str:
+    """Truncate text to max_len at the nearest preceding word boundary."""
+    if len(text) <= max_len:
+        return text
+    # Find the last space at or before position max_len
+    space_idx = text.rfind(" ", 0, max_len + 1)
+    if space_idx == -1:
+        # No space found — single long word, truncate at max_len directly
+        return text[:max_len]
+    return text[:space_idx].rstrip()
+
+
+def _is_unchanged_title(original: str, rephrased: str) -> bool:
+    """Check if rephrased title is effectively identical to original."""
+    def _normalize(s: str) -> str:
+        return re.sub(r'\s+', ' ', s).strip().lower()
+    return _normalize(original) == _normalize(rephrased)
+
+
+def rephrase_title(article: dict) -> dict:
+    """
+    Rephrase an article's title using the Groq LLM.
+    
+    Mutates and returns the article dict with:
+      - article['original_title'] = original title (byte-for-byte)
+      - article['title'] = rephrased title (or fallback)
+    
+    On failure: falls back to cleaned original title, no retry.
+    """
+    original_title = article.get('title', '')
+    article['original_title'] = original_title
+
+    try:
+        prompt = REPHRASE_TITLE_PROMPT.format(title=original_title)
+        response = get_groq_client().chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=60,
+            temperature=0.7,
+        )
+        rephrased = response.choices[0].message.content.strip()
+
+        # Validate response: non-empty, not whitespace-only, not identical to original
+        if rephrased and not rephrased.isspace() and not _is_unchanged_title(original_title, rephrased):
+            article['title'] = _truncate_at_word_boundary(rephrased, 100)
+        else:
+            logger.warning(f"[NLP] Title rephrase returned invalid response for '{original_title}': using fallback")
+            article['title'] = _clean_title_fallback(original_title)
+    except Exception as e:
+        logger.warning(f"[NLP] Title rephrase failed for '{original_title}': {e}")
+        article['title'] = _clean_title_fallback(original_title)
+
+    return article
+
+
 # ── 3. Reading Time Estimation ────────────────────────────────────────────────
 
 AVG_WORDS_PER_MINUTE = 200
+
+
+def _fetch_full_article_text(url: str) -> str:
+    """Fetch the full article text from a URL for reading time estimation.
+    
+    Returns the extracted body text, or an empty string on any failure.
+    """
+    try:
+        response = requests.get(url, timeout=8)
+        response.raise_for_status()
+        text = BeautifulSoup(response.text, "html.parser").get_text(separator=" ")
+        return text
+    except Exception:
+        return ""
 
 
 def estimate_reading_time(text: str) -> int:
@@ -378,12 +483,16 @@ def process_articles(
     for i, article in enumerate(top_articles):
         print(f"  [{i+1}/{len(top_articles)}] {article['title'][:60]}...")
         summary = summarize_article(article)
-        reading_time = estimate_reading_time(
-            article.get("content") or article.get("description") or ""
-        )
+        article_with_summary = {**article, "summary": summary}
+        rephrased = rephrase_title(article_with_summary)
+        # Fetch full article text for accurate reading time estimation
+        full_text = _fetch_full_article_text(article.get("url", ""))
+        if full_text:
+            reading_time = estimate_reading_time(full_text)
+        else:
+            reading_time = 4
         enriched.append({
-            **article,
-            "summary": summary,
+            **rephrased,
             "reading_time": reading_time,
         })
 
