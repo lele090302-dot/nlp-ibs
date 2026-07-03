@@ -259,6 +259,20 @@ def _is_unchanged_title(original: str, rephrased: str) -> bool:
     return _normalize(original) == _normalize(rephrased)
 
 
+def _is_truncated_title(title: str) -> bool:
+    """Detect titles that were clearly cut off mid-sentence by token limits."""
+    if not title:
+        return True
+    # Common trailing words that indicate truncation
+    truncation_markers = (
+        'the', 'a', 'an', 'of', 'in', 'on', 'at', 'to', 'for', 'by',
+        'with', 'and', 'or', 'but', 'its', 'their', 'that', 'this',
+        'from', 'as', 'is', 'are', 'was', 'were', 'has', 'have', 'had',
+    )
+    last_word = title.rstrip().rsplit(None, 1)[-1].lower().rstrip('.,;:')
+    return last_word in truncation_markers
+
+
 def rephrase_title(article: dict) -> dict:
     """
     Rephrase an article's title using the Groq LLM.
@@ -277,16 +291,22 @@ def rephrase_title(article: dict) -> dict:
         response = get_groq_client().chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=60,
+            max_tokens=80,
             temperature=0.7,
         )
         rephrased = response.choices[0].message.content.strip()
 
-        # Validate response: non-empty, not whitespace-only, not identical to original
-        if rephrased and not rephrased.isspace() and not _is_unchanged_title(original_title, rephrased):
+        # Validate response: non-empty, not whitespace-only, not identical to original,
+        # and not truncated mid-sentence by token limits
+        if (
+            rephrased
+            and not rephrased.isspace()
+            and not _is_unchanged_title(original_title, rephrased)
+            and not _is_truncated_title(rephrased)
+        ):
             article['title'] = _truncate_at_word_boundary(rephrased, 100)
         else:
-            logger.warning(f"[NLP] Title rephrase returned invalid response for '{original_title}': using fallback")
+            logger.warning(f"[NLP] Title rephrase returned invalid/truncated response for '{original_title}': using fallback")
             article['title'] = _clean_title_fallback(original_title)
     except Exception as e:
         logger.warning(f"[NLP] Title rephrase failed for '{original_title}': {e}")
