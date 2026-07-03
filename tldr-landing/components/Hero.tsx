@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 
 const topics = [
-  { label: "Generative AI", short: "GenAI" },
+  { label: "AI", short: "AI" },
   { label: "Fintech",       short: "Fintech" },
   { label: "Tech",          short: "Tech" },
   { label: "Startups",      short: "Startups" },
@@ -58,9 +58,9 @@ export default function Hero({ selectedTopics, onTopicsChange }: Props) {
       if (res.ok) {
         setStatus("success");
         const cadenceMsg = cadence === "daily"
-          ? "Your newsletter will be delivered every day at 8:00 AM CET, before your first coffee."
-          : "Your newsletter will be delivered every Monday at 8:00 AM CET, before your first coffee.";
-        setMessage(`${data.message ?? "Subscribed!"} ${cadenceMsg}`);
+          ? "Your newsletter will be delivered every day at 8:00 AM CET/CEST, before your first coffee."
+          : "Your newsletter will be delivered every Monday at 8:00 AM CET/CEST, before your first coffee.";
+        setMessage(`Preferences updated! ${cadenceMsg}`);
       } else {
         setStatus("error");
         setMessage(data.error ?? "Something went wrong. Please try again.");
@@ -244,7 +244,7 @@ export default function Hero({ selectedTopics, onTopicsChange }: Props) {
                       {t}
                     </span>
                   ))
-                : ["GenAI", "Fintech", "Startups"].map((t) => (
+                : ["AI", "Fintech", "Startups"].map((t) => (
                     <span key={t} className="text-xs font-sans font-medium px-3 py-1 rounded-full bg-blush text-terracotta">
                       {t}
                     </span>
