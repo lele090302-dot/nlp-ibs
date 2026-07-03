@@ -4,6 +4,7 @@ Run with: streamlit run app.py
 """
 
 import os
+from datetime import datetime
 import streamlit as st
 from db import (
     init_db, add_user, unsubscribe, log_feedback,
@@ -215,6 +216,16 @@ with tab_admin:
     # Admin actions
     col_stage, col_send = st.columns(2)
     with col_stage:
+        # Warn if there's an existing batch with approvals
+        existing_run = get_latest_run_id()
+        has_approvals = False
+        if existing_run:
+            existing_articles = get_review_queue(run_id=existing_run)
+            has_approvals = any(a["status"] == "approved" for a in existing_articles)
+
+        if has_approvals:
+            st.warning("⚠️ Current batch has approved articles. Staging a new batch will create a fresh queue — existing approvals stay in the DB but won't be used for sending.")
+
         if st.button("📥 Stage new batch", use_container_width=True,
                      help="Fetch articles, rank top 15, save to queue, email admin"):
             with st.spinner("Fetching and ranking articles..."):
@@ -227,12 +238,15 @@ with tab_admin:
 
     with col_send:
         if st.button("📤 Send approved now", use_container_width=True,
-                     help="Send newsletters using approved articles (or AI fallback)"):
+                     help="Send newsletters using approved articles from the current batch (or AI fallback)"):
             with st.spinner("Sending newsletters..."):
                 try:
                     run_id = get_latest_run_id()
-                    send_pipeline(run_id=run_id)
-                    st.success("✅ Newsletters sent!")
+                    if not run_id:
+                        st.error("No batch staged yet. Stage a batch first.")
+                    else:
+                        send_pipeline(run_id=run_id)
+                        st.success(f"✅ Newsletters sent using batch `{run_id}`!")
                 except Exception as e:
                     st.error(f"Send error: {e}")
 
@@ -247,6 +261,19 @@ with tab_admin:
         pending  = [a for a in articles if a["status"] == "pending"]
         approved = [a for a in articles if a["status"] == "approved"]
         rejected = [a for a in articles if a["status"] == "rejected"]
+
+        # Parse batch date from run_id (format: YYYYMMDD_HHMMSS_hexid)
+        try:
+            batch_dt = datetime.strptime(run_id[:15], "%Y%m%d_%H%M%S")
+            batch_label = batch_dt.strftime("%B %d, %Y at %H:%M UTC")
+        except (ValueError, IndexError):
+            batch_label = "Unknown date"
+
+        st.markdown(
+            f"### 📅 Batch: {batch_label}\n"
+            f"Reviewing articles staged on **{batch_label}**. "
+            f"Approvals apply to this batch only — staging a new batch starts fresh."
+        )
 
         # Summary metrics
         m1, m2, m3, m4 = st.columns(4)
