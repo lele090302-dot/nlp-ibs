@@ -237,9 +237,8 @@ The scheduler runs as a systemd service on AWS EC2 with:
 
 ## Screenshots
 
-<img width="338" height="254" alt="image" src="https://github.com/user-attachments/assets/6eaf6c67-c74f-48aa-8d28-3ed11550345d" />
-<img width="353" height="161" alt="image" src="https://github.com/user-attachments/assets/0d490f4b-cd3f-4225-90d0-ce89c2bda3e2" />
-<img width="362" height="403" alt="image" src="https://github.com/user-attachments/assets/3d3856cd-b719-41f5-8641-28bf98628810" />
+![Screenshot 1](image.png)
+![Screenshot 2](image-1.png)
 
 ---
 
