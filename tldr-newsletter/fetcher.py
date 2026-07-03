@@ -40,12 +40,48 @@ RSS_FEEDS = {
 }
 
 # NewsAPI keyword mapping per topic
+# Strategy: (actors OR category terms) AND (event signals) for high-precision results.
+# NOTE: NewsAPI 'q' param has a 500-char max. Keep each query well under that.
+# Update actor lists monthly as the landscape shifts.
 TOPIC_KEYWORDS = {
-    "AI": "generative AI OR large language model OR ChatGPT OR LLM OR artificial intelligence",
-    "Fintech": "fintech OR neobank OR digital payments OR open banking",
-    "Tech": "technology OR software OR silicon valley OR big tech",
-    "Startups": "startup OR venture capital OR seed funding OR Series A",
-    "Crypto": "bitcoin OR ethereum OR cryptocurrency OR blockchain OR DeFi",
+    "AI": (
+        "(OpenAI OR Anthropic OR Nvidia OR \"Scale AI\" OR Google DeepMind OR Mistral OR xAI"
+        " OR Meta AI OR ChatGPT OR Claude OR Gemini OR LLM OR \"AI agents\""
+        " OR \"reasoning model\" OR \"AI infrastructure\" OR \"data center\""
+        " OR robotics OR \"artificial intelligence\")"
+        " AND (launch OR announce OR release OR funding OR regulation"
+        " OR partnership OR acquisition OR benchmark OR safety OR open-source)"
+    ),
+    "Fintech": (
+        "(Stripe OR Revolut OR Plaid OR Square OR Nubank OR Klarna OR Wise"
+        " OR Adyen OR Robinhood OR fintech OR neobank OR \"open banking\""
+        " OR \"embedded finance\" OR \"digital payments\")"
+        " AND (launch OR funding OR IPO OR partnership OR regulation"
+        " OR acquisition OR expansion OR earnings OR breach)"
+    ),
+    "Tech": (
+        "(Apple OR Google OR Microsoft OR Amazon OR Meta OR Nvidia OR Samsung"
+        " OR TSMC OR Intel OR Qualcomm OR semiconductor OR cybersecurity"
+        " OR \"quantum computing\" OR \"cloud computing\" OR robotics)"
+        " AND (launch OR announce OR release OR earnings OR acquisition"
+        " OR antitrust OR layoff OR partnership OR hack OR outage)"
+        " NOT (recipe OR movie OR \"TV show\" OR sports)"
+    ),
+    "Startups": (
+        "(\"venture capital\" OR \"startup funding\" OR \"seed round\" OR \"Series A\""
+        " OR \"Series B\" OR unicorn OR YC OR \"Y Combinator\" OR Techstars"
+        " OR a16z OR Sequoia OR Accel OR startup OR founder)"
+        " AND (raised OR funding OR valuation OR IPO OR acquisition"
+        " OR launch OR pivot OR layoff OR accelerator OR \"demo day\")"
+    ),
+    "Crypto": (
+        "(Bitcoin OR Ethereum OR Solana OR Coinbase OR Binance OR Ripple"
+        " OR Tether OR Circle OR cryptocurrency OR DeFi OR stablecoin"
+        " OR tokenization OR \"crypto ETF\" OR \"crypto regulation\""
+        " OR SEC OR blockchain)"
+        " AND (price OR ruling OR launch OR hack OR ETF OR regulation"
+        " OR partnership OR upgrade OR adoption OR ban)"
+    ),
 }
 
 
@@ -61,7 +97,7 @@ def fetch_from_newsapi(topic: str, page_size: int = 20, freshness_days: int = 5)
         "q": query,
         "from": from_date,
         "language": "en",
-        "sortBy": "publishedAt",
+        "sortBy": "relevancy",
         "pageSize": page_size,
         "apiKey": NEWS_API_KEY,
     }
