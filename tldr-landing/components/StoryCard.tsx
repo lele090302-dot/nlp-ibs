@@ -7,10 +7,27 @@ export interface Story {
   topic: string;
   readingTime: number;
   imageUrl: string;
+  imagePosition?: string;
   source: string;
 }
 
+// Only these hosts are allowed by next.config.mjs — anything else falls back to a placeholder
+const ALLOWED_IMAGE_HOSTS = ["images.unsplash.com", "picsum.photos"];
+
+function isAllowedImageUrl(url: string): boolean {
+  if (!url) return false;
+  try {
+    return ALLOWED_IMAGE_HOSTS.includes(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
 export default function StoryCard({ story }: { story: Story }) {
+  const imageSrc = isAllowedImageUrl(story.imageUrl)
+    ? story.imageUrl
+    : "https://images.unsplash.com/photo-1495020683877-95802f6f8ceb?w=400&q=80";
+
   return (
     <article
       className="bg-white rounded-2xl border border-border shadow-card overflow-hidden
@@ -19,10 +36,10 @@ export default function StoryCard({ story }: { story: Story }) {
       {/* Thumbnail */}
       <div className="relative w-full sm:w-40 h-44 sm:h-auto flex-shrink-0">
         <Image
-          src={story.imageUrl}
+          src={imageSrc}
           alt={story.title}
           fill
-          className="object-cover"
+          className={`object-cover ${story.imagePosition ?? "object-center"}`}
         />
         {/* Rank badge */}
         <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-terracotta text-white

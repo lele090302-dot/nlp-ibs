@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 import requests
 import feedparser
@@ -15,7 +16,7 @@ NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 
 # RSS feeds per topic as fallback / supplement
 RSS_FEEDS = {
-    "GenAI": [
+    "AI": [
         "https://feeds.feedburner.com/venturebeat/SZYF",  # VentureBeat AI
         "https://techcrunch.com/category/artificial-intelligence/feed/",
         "https://arstechnica.com/ai/feed/",
@@ -40,7 +41,7 @@ RSS_FEEDS = {
 
 # NewsAPI keyword mapping per topic
 TOPIC_KEYWORDS = {
-    "GenAI": "generative AI OR large language model OR ChatGPT OR LLM",
+    "AI": "generative AI OR large language model OR ChatGPT OR LLM OR artificial intelligence",
     "Fintech": "fintech OR neobank OR digital payments OR open banking",
     "Tech": "technology OR software OR silicon valley OR big tech",
     "Startups": "startup OR venture capital OR seed funding OR Series A",
@@ -170,6 +171,26 @@ def deduplicate(articles: list[dict]) -> list[dict]:
     return unique
 
 
+MANUAL_ARTICLES_PATH = os.path.join(os.path.dirname(__file__), "manual_articles.json")
+
+
+def fetch_manual_articles() -> list[dict]:
+    """Load manually curated articles from the local JSON file."""
+    if not os.path.exists(MANUAL_ARTICLES_PATH):
+        return []
+    try:
+        with open(MANUAL_ARTICLES_PATH, "r") as f:
+            articles = json.load(f)
+        # Add published_at if missing so recency scoring doesn't penalize them
+        for a in articles:
+            if not a.get("published_at"):
+                a["published_at"] = datetime.now(timezone.utc).isoformat()
+        return [a for a in articles if a.get("title") and a.get("url")]
+    except (json.JSONDecodeError, IOError) as e:
+        logger.warning(f"[Manual] Error reading manual articles: {e}")
+        return []
+
+
 def fetch_articles_for_topics(topics: list[str], freshness_days: int = 5) -> list[dict]:
     """Main entry point: fetch and deduplicate articles for a list of topics."""
     all_articles = []
@@ -179,5 +200,11 @@ def fetch_articles_for_topics(topics: list[str], freshness_days: int = 5) -> lis
         rss_articles = fetch_from_rss(topic, freshness_days=freshness_days)
         all_articles.extend(newsapi_articles)
         all_articles.extend(rss_articles)
+
+    # Include manually curated articles
+    manual = fetch_manual_articles()
+    if manual:
+        logger.info(f"[Manual] Adding {len(manual)} manually curated article(s)")
+    all_articles.extend(manual)
 
     return deduplicate(all_articles)

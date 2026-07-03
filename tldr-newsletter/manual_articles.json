@@ -1,0 +1,17 @@
+[
+  {
+    "title": "New Vulnerability Reveals Yet Another Problem with AI Browsers",
+    "url": "https://arstechnica.com/security/2026/06/ai-browsers-can-be-lulled-into-a-dream-world-where-guardrails-no-longer-apply/",
+    "source": "Manual",
+    "topic": "AI",
+    "description": "A new attack demonstrates how AI browsers can be manipulated into bypassing safeguards, raising concerns about data security and autonomous actions."
+  },
+
+  {
+    "title": "Anthropic Launches Claude Sonnet 5, Bringing Lower-Cost AI Agents Closer to Flagship Performance",
+    "url": "https://thenextweb.com/news/anthropic-claude-sonnet-5-agentic-model-pricing",
+    "source": "Manual",
+    "topic": "AI",
+    "description": "Claude Sonnet 5 delivers near-Opus performance at a fraction of the cost, reflecting Anthropic's strategy to make always-on AI agents practical for everyday business use."
+  }
+]

@@ -5,43 +5,45 @@ import StockTicker from "./StockTicker";
 const stories: Story[] = [
   {
     rank: 1,
-    title: "OpenAI launches GPT-5 with breakthrough reasoning capabilities",
+    title: "Meta eyes a side hustle: renting out its AI compute like SpaceX",
     summary:
-      "OpenAI has released GPT-5, featuring a new 'thinking mode' that dramatically improves performance on complex reasoning tasks. The model outperforms its predecessor on all major benchmarks and is available via API today.",
-    topic: "GenAI",
+      "Meta is quietly plotting a cloud business that would sell spare AI compute and model access to outside customers, putting it in direct competition with AWS, Google Cloud, and Azure. The pivot follows a $180B+ infrastructure bet and hints that owning data centers, not just building models, may be where the real AI money is.",
+    topic: "Tech",
     readingTime: 3,
     source: "TechCrunch",
-    imageUrl: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=400&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1635002962487-2c1d4d2f63c2?w=400&q=80",
   },
   {
     rank: 2,
-    title: "Stripe raises $1B at $65B valuation to accelerate AI-powered payments",
+    title: "Anthropic drops Claude Sonnet 5 — flagship-level smarts, mid-tier price tag",
     summary:
-      "Payments giant Stripe has closed a $1 billion funding round, valuing the company at $65 billion. The capital will fund expansion into new markets and accelerate its suite of AI-powered financial tools.",
-    topic: "Fintech",
-    readingTime: 2,
-    source: "Bloomberg",
-    imageUrl: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=400&q=80",
+      "Anthropic's newest model delivers near-Opus performance for agentic tasks like coding and tool use, at roughly 40-60% less cost. It's now the default for Free and Pro users, and the timing lines up with Anthropic's push toward a much-anticipated IPO.",
+    topic: "AI",
+    readingTime: 3,
+    source: "VentureBeat",
+    imageUrl: "https://images.unsplash.com/photo-1775441031103-1d559a6f91cd?w=400&q=80",
+    imagePosition: "object-[20%_center]",
   },
   {
     rank: 3,
-    title: "Apple's M4 Ultra chip sets new performance records in independent tests",
+    title: "Europe's crypto grace period ends, and licenses are flying out the door",
     summary:
-      "Independent benchmarks confirm Apple's M4 Ultra delivers a 40% performance uplift over M3 Ultra in multi-core workloads. The chip is now shipping in the new Mac Pro, starting at $6,999.",
-    topic: "Tech",
-    readingTime: 4,
-    source: "The Verge",
-    imageUrl: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&q=80",
+      "As the EU's MiCA transition period wrapped up, regulators rushed to approve a fresh batch of crypto firms across Italy, France, Malta, and Spain, pushing the bloc's total past 240 licensed providers. Binance, notably, still isn't one of them.",
+    topic: "Crypto",
+    readingTime: 2,
+    source: "CoinTelegraph",
+    imageUrl: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=400&q=80",
+    imagePosition: "object-right",
   },
   {
     rank: 4,
-    title: "Ethereum ETF inflows hit record $800M in a single week",
+    title: "J.P. Morgan and India team up so overseas payments show the real exchange rate",
     summary:
-      "Spot Ethereum ETFs recorded their highest-ever weekly inflows of $800 million, driven by institutional demand following the SEC's approval of staking features. ETH price rose 18% on the news.",
-    topic: "Crypto",
-    readingTime: 3,
-    source: "CoinTelegraph",
-    imageUrl: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=400&q=80",
+      "J.P. Morgan is linking up with India's UPI payment network so people sending money across borders can see the exact amount they'll pay or receive right away, instead of guessing at exchange rates. The feature is already live in nine countries, with more expected to follow.",
+    topic: "Fintech",
+    readingTime: 2,
+    source: "J.P. Morgan Newsroom",
+    imageUrl: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=400&q=80",
   },
 ];
 
@@ -96,7 +98,7 @@ export default function Stories() {
                 Clarity is rare.&rdquo;
               </p>
               <p className="font-sans text-xs text-muted uppercase tracking-widest">
-                — The TL;DR Principle
+                - The TL;DR Principle
               </p>
             </div>
           </aside>

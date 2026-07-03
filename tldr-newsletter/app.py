@@ -87,7 +87,7 @@ with tab_subscribe:
         st.markdown("**Choose your topics** (pick 1-5)")
         col1, col2 = st.columns(2)
         with col1:
-            t_genai   = st.checkbox("🤖 GenAI")
+            t_genai   = st.checkbox("🤖 AI")
             t_fintech = st.checkbox("💳 Fintech")
             t_tech    = st.checkbox("💻 Tech")
         with col2:
@@ -104,7 +104,7 @@ with tab_subscribe:
 
     if submitted:
         selected_topics = []
-        if t_genai:    selected_topics.append("GenAI")
+        if t_genai:    selected_topics.append("AI")
         if t_fintech:  selected_topics.append("Fintech")
         if t_tech:     selected_topics.append("Tech")
         if t_startups: selected_topics.append("Startups")
@@ -165,7 +165,7 @@ with tab_demo:
             sample_articles = [
                 {
                     "title": "OpenAI releases GPT-5 with reasoning improvements",
-                    "source": "TechCrunch", "topic": "GenAI",
+                    "source": "TechCrunch", "topic": "AI",
                     "url": "https://techcrunch.com",
                     "summary": "OpenAI has launched GPT-5, featuring improved reasoning and a new thinking mode. It outperforms its predecessor on all major benchmarks and is available via API today.",
                     "reading_time": 3,
@@ -178,7 +178,7 @@ with tab_demo:
                     "reading_time": 2,
                 },
             ]
-            html = build_html(preview_name, preview_email, ["GenAI", "Fintech"], sample_articles)
+            html = build_html(preview_name, preview_email, ["AI", "Fintech"], sample_articles)
             with st.spinner("Sending via Amazon SES..."):
                 success = send_newsletter(preview_email, "TL;DR Newsletter - Sample Issue", html)
             if success:
@@ -193,13 +193,13 @@ with tab_demo:
         sample_articles = [
             {
                 "title": "OpenAI releases GPT-5 with reasoning improvements",
-                "source": "TechCrunch", "topic": "GenAI",
+                "source": "TechCrunch", "topic": "AI",
                 "url": "https://techcrunch.com",
                 "summary": "OpenAI has launched GPT-5 with improved reasoning and a new thinking mode.",
                 "reading_time": 3,
             },
         ]
-        html = build_html("Demo User", "demo@example.com", ["GenAI"], sample_articles)
+        html = build_html("Demo User", "demo@example.com", ["AI"], sample_articles)
         st.components.v1.html(html, height=700, scrolling=True)
 
 # ── Admin Tab ─────────────────────────────────────────────────────────────────

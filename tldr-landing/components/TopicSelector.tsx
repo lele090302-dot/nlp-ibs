@@ -1,7 +1,7 @@
 "use client";
 
 const topics = [
-  { label: "Generative AI", emoji: "🤖" },
+  { label: "AI", emoji: "🤖" },
   { label: "Fintech",       emoji: "💳" },
   { label: "Tech",          emoji: "💻" },
   { label: "Startups",      emoji: "🚀" },

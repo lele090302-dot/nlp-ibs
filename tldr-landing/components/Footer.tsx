@@ -27,7 +27,7 @@ export default function Footer() {
         body: JSON.stringify({
           name: email.split("@")[0],
           email: email.trim(),
-          topics: ["Generative AI", "Fintech", "Tech", "Startups", "Crypto"],
+          topics: ["AI", "Fintech", "Tech", "Startups", "Crypto"],
           frequency: "daily",
         }),
       });
@@ -51,7 +51,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="font-sans text-sm text-white/70 leading-relaxed max-w-xs">
-              AI-curated. Human-readable. The top stories in tech, GenAI, and
+              AI-curated. Human-readable. The top stories in tech, AI, and
               fintech, startups and crypto - delivered daily.
             </p>
           </div>

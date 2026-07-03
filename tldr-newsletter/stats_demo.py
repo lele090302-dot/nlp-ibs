@@ -21,7 +21,7 @@ load_dotenv()
 from fetcher import fetch_articles_for_topics
 from nlp_pipeline import score_relevance, RELEVANCE_THRESHOLD, get_embedder
 
-TOPICS = ["GenAI", "Fintech", "Tech", "Startups", "Crypto"]
+TOPICS = ["AI", "Fintech", "Tech", "Startups", "Crypto"]
 
 print("=" * 60)
 print("  TL;DR Newsletter - Pipeline Stats Demo")

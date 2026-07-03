@@ -31,7 +31,7 @@ def build_sample_html(name: str, email: str) -> str:
             {
                 "title": "Sample: OpenAI releases GPT-5",
                 "source": "Demo",
-                "topic": "GenAI",
+                "topic": "AI",
                 "url": "https://example.com/gpt5",
                 "summary": "This is a short sample summary for testing.",
                 "reading_time": 2,
@@ -45,7 +45,7 @@ def build_sample_html(name: str, email: str) -> str:
                 "reading_time": 1,
             },
         ]
-        return build_html(name, email, ["GenAI", "Fintech"], sample_articles)
+        return build_html(name, email, ["AI", "Fintech"], sample_articles)
     except Exception:
         # Fallback simple HTML
         return f"<html><body><h1>TL;DR Newsletter - Sample</h1><p>Hi {name} ({email})</p><p>This is a test email.</p></body></html>"

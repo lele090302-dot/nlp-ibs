@@ -8,7 +8,7 @@ import Stories from "@/components/Stories";
 import Footer from "@/components/Footer";
 
 export default function Home() {
-  const [selectedTopics, setSelectedTopics] = useState<string[]>(["Generative AI"]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>(["AI"]);
 
   return (
     <main className="min-h-screen bg-cream">

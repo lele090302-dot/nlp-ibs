@@ -68,7 +68,7 @@ def article_strategy(min_age_days=4, max_age_days=30):
             whitelist_categories=("L", "N", "P", "Z"),
             whitelist_characters=" .",
         )),
-        "topic": st.sampled_from(["GenAI", "Fintech", "Tech", "Startups", "Crypto"]),
+        "topic": st.sampled_from(["AI", "Fintech", "Tech", "Startups", "Crypto"]),
     })
 
 
@@ -99,7 +99,7 @@ class TestFreshnessFiltering:
 
             # Temporarily set a fake API key
             with patch("fetcher.NEWS_API_KEY", "fake-key-for-test"):
-                fetch_from_newsapi("GenAI")
+                fetch_from_newsapi("AI")
 
             # Check the params that were passed to requests.get
             mock_get.assert_called_once()
@@ -317,14 +317,14 @@ class TestEmailSize:
                 f"?email=enterprise.subscriber%40very-long-company-domain-name.com"
                 f"&url=https%3A%2F%2Fwww.example-tech-publication.com%2F2024%2F01%2F"
                 f"major-technology-corporation-platform-{i}%2F"
-                f"&source=TechCrunch%20International&topic=GenAI"
+                f"&source=TechCrunch%20International&topic=AI"
             )
 
             articles.append({
                 "title": f"Breaking Analysis {i+1}: Major Technology Corporation Announces Revolutionary AI Platform That Promises Complete Industry Transformation Across All Sectors",
                 "url": url,
                 "source": "TechCrunch International Business & Technology",
-                "topic": data.draw(st.sampled_from(["GenAI", "Fintech", "Tech", "Startups", "Crypto"])),
+                "topic": data.draw(st.sampled_from(["AI", "Fintech", "Tech", "Startups", "Crypto"])),
                 "summary": summary,
                 "reading_time": 7,
                 "relevance_score": 0.85,
@@ -335,7 +335,7 @@ class TestEmailSize:
         html = build_html(
             user_name="Enterprise Technology Professional",
             user_email="subscriber.user@enterprise-company.com",
-            topics=["GenAI", "Tech", "Fintech", "Startups", "Crypto"],
+            topics=["AI", "Tech", "Fintech", "Startups", "Crypto"],
             articles=articles,
         )
 
@@ -408,7 +408,7 @@ class TestDeduplication:
                 "published_at": datetime.now(timezone.utc).isoformat(),
                 "description": "This article was already sent in a previous edition.",
                 "content": "Full content of the previously sent article. " * 10,
-                "topic": "GenAI",
+                "topic": "AI",
             })
 
         # Add some fresh articles that should be kept
@@ -420,7 +420,7 @@ class TestDeduplication:
                 "published_at": datetime.now(timezone.utc).isoformat(),
                 "description": "A fresh article not previously sent to this user.",
                 "content": "Fresh content about new developments in technology. " * 10,
-                "topic": "GenAI",
+                "topic": "AI",
             })
 
         # Mock the scoring/summarization since we're testing dedup logic
@@ -438,7 +438,7 @@ class TestDeduplication:
             try:
                 result = process_articles(
                     articles=articles,
-                    user_topics=["GenAI"],
+                    user_topics=["AI"],
                     top_n=5,
                     sent_urls=sent_urls_set,
                 )

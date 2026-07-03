@@ -3,8 +3,7 @@ import path from "path";
 
 // Map landing page topic labels to the values the Python backend expects
 const TOPIC_MAP: Record<string, string> = {
-  "Generative AI": "GenAI",
-  "GenAI":         "GenAI",
+  "AI":            "AI",
   "Fintech":       "Fintech",
   "Tech":          "Tech",
   "Startups":      "Startups",
