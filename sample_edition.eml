@@ -1,0 +1,623 @@
+Delivered-To: lyle090302@gmail.com
+Received: by 2002:a17:907:9381:b0:c0b:d657:b501 with SMTP id cm1csp149527ejc;
+        Wed, 1 Jul 2026 23:57:34 -0700 (PDT)
+X-Received: by 2002:ac8:7c51:0:b0:51b:f40b:2faf with SMTP id d75a77b69052e-51c26a7769dmr39301391cf.4.1782975453790;
+        Wed, 01 Jul 2026 23:57:33 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1782975453; cv=none;
+        d=google.com; s=arc-20260327;
+        b=Xd0rN5WfucWwUjcmXorcAQxzzsztnlFqrAU5Rjf6sQiQqwWgS4vQ31MYa3rbU1O/nq
+         ++Ynn4Q2DAL+LVaQIQfswuUyLzUylQ9kePGIo1UzmPrRiFHwWpyuDCvMvsrV4nEeijlL
+         gLzW0M9/xL2xD7ac/dJBlvckF9Q1hxbo94VjsHXMXPELAjGZy7kiiXIIkW3U/NzHE9zV
+         lxmr98E3BDrzKTR1NpXYkrr6Glb1wLyM12NSblpbIkj9xibp5PfEqR1RiDoOxlclvfIS
+         Afcc/Dw+XZdjPoWSIdoozGXW73Ok8tCuTMim9j8JlcmsdOWcu1MWW2uLXGLpxsKTiUnh
+         I6ag==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=feedback-id:date:message-id:mime-version:subject:to:from
+         :dkim-signature:dkim-signature;
+        bh=ew8tO0ibmfk2W9n3evSLiEO7j3eGXGkrMa65gG3N2+M=;
+        fh=31U6YIuRK4JPvXTVKZiIg99o7TwGSLAV7dQt7EvWjyk=;
+        b=XcfS6xTyZ8Nw6LcDpSqhisWxSDDBkV0QBauWmmeg6vEVPv2OkRtKAtt5GC4Uq2Q8L6
+         Z+FZv1qVutNDDxiofNCla/x+StnP/fXC8Vj+TTfO9QnN9V6r4kuPogzsWEqArEOw28YS
+         MbNB2gqr1J8YQA8M807XiK7CgrXF+nOu9qywkx8N8vsq8EtEtOuGOO01UCvYRtq29GiI
+         JpilGGsYvLqK5Wk2rqF51f3kP/R7zmSgHHLm2lZ6qoNyV1mVL9BV0QzV/nPHVQApN9sI
+         7BC2NPz5k7PNJ9Ps2EJvEX9ZUfVWbmGNxrBeZUGLH0wTm7b0fCof1FGcgq+oxiX+pxG9
+         Pytg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@codesonline.rocks header.s=t7a2ienpksfouasv57lbvrycxikym274 header.b=S35DAxm7;
+       dkim=pass header.i=@amazonses.com header.s=224i4yxa5dv7c2xz3womw6peuasteono header.b=LoGGEe5d;
+       spf=pass (google.com: domain of 0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000@mail.codesonline.rocks designates 54.240.8.74 as permitted sender) smtp.mailfrom=0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000@mail.codesonline.rocks;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=codesonline.rocks
+Return-Path: <0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000@mail.codesonline.rocks>
+Received: from a8-74.smtp-out.amazonses.com (a8-74.smtp-out.amazonses.com. [54.240.8.74])
+        by mx.google.com with ESMTPS id d75a77b69052e-51c30c05a00si12025411cf.33.2026.07.01.23.57.33
+        for <lyle090302@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 01 Jul 2026 23:57:33 -0700 (PDT)
+Received-SPF: pass (google.com: domain of 0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000@mail.codesonline.rocks designates 54.240.8.74 as permitted sender) client-ip=54.240.8.74;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@codesonline.rocks header.s=t7a2ienpksfouasv57lbvrycxikym274 header.b=S35DAxm7;
+       dkim=pass header.i=@amazonses.com header.s=224i4yxa5dv7c2xz3womw6peuasteono header.b=LoGGEe5d;
+       spf=pass (google.com: domain of 0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000@mail.codesonline.rocks designates 54.240.8.74 as permitted sender) smtp.mailfrom=0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000@mail.codesonline.rocks;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=codesonline.rocks
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=t7a2ienpksfouasv57lbvrycxikym274; d=codesonline.rocks;
+	t=1782975453;
+	h=From:To:Subject:MIME-Version:Content-Type:Message-ID:Date;
+	bh=9+axPP8hZwOjTTGPCGFBWKhHtdqIZOlzSMsQBS4qhsg=;
+	b=S35DAxm7ETn7iiGpmkoHltQC+1f1/SkIG1hm78eUOVbQYTsmmeDsa7XdSN9DcQuM
+	3L8OY6PamPsxrviKffatVrhOOmXLCwwJ7lA0vtRssYv9M3J/eJ5svRZ7uS80Gv3I02J
+	7pVV2/gkisNGJXyf68cJXI2QxlzNiU4ril2f3fyT4rGBVmptxuegINjGxP42VT23TdY
+	jCfmgxgUbaOeg1WFoRmaB5A71NXOJE5BY5HiLXMIs8JoDRvcxQsQQxHjW8qJeYsKZkQ
+	xgk71MESOH9xpFv+Uhi3oL/zcwxQxRwb7N8lY8uownj9ZkdqG/dMTVxSnm99LzFDCt1
+	2ok/Ur5vEQ==
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=224i4yxa5dv7c2xz3womw6peuasteono; d=amazonses.com; t=1782975453;
+	h=From:To:Subject:MIME-Version:Content-Type:Message-ID:Date:Feedback-ID;
+	bh=9+axPP8hZwOjTTGPCGFBWKhHtdqIZOlzSMsQBS4qhsg=;
+	b=LoGGEe5d70ncbJhXiQUNE662pZZCNAhoPyNqMqPmuBnI9f3ZfVa9c0L2M2OYNYC/
+	9Eb9egJm9/bC4jFUAkrxrwJaK8VkyvDjrZoLtQ5fvL+KwRYtJltMOTE/q/CFEGyg599
+	MVXzWKuDR4ZTPrV1b8RNn+bpIG0VSQLS1XO68SWM=
+From: newsletter@codesonline.rocks
+To: lyle090302@gmail.com
+Subject: Your TL;DR Newsletter - Fintech, Startups
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_640285_1619914374.1782975452919"
+Message-ID: <0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000@email.amazonses.com>
+Date: Thu, 2 Jul 2026 06:57:32 +0000
+Feedback-ID: ::1.us-east-1.qlAs2G1FYdS6Ku8xbubfH/BvD9ElFQEbzdJ6qcwhPCU=:AmazonSES
+X-SES-Outgoing: 2026.07.02-54.240.8.74
+
+------=_Part_640285_1619914374.1782975452919
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+Your TL;DR Newsletter - please view in an HTML-capable email client.
+------=_Part_640285_1619914374.1782975452919
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html>
+<html lang=3D"en">
+<head>
+  <meta charset=3D"UTF-8" />
+  <meta name=3D"viewport" content=3D"width=3Ddevice-width, initial-scale=3D=
+1.0"/>
+  <title>Your TL;DR Newsletter</title>
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe =
+UI', sans-serif; background: #FFF8F3; margin: 0; padding: 0; }
+    .wrapper { max-width: 640px; margin: 32px auto; background: #ffffff; bo=
+rder-radius: 12px; overflow: hidden; box-shadow: 0 2px 20px rgba(30,27,24,0=
+.07); }
+    .header { background: linear-gradient(135deg, #C83A2A 0%, #b03020 100%)=
+; padding: 36px 40px; }
+    .header-logo { margin-bottom: 12px; }
+    .header-logo img { height: 72px; width: auto; }
+    .header h1 { color: #ffffff; margin: 0; font-size: 26px; font-family: '=
+Playfair Display', Georgia, serif; letter-spacing: -0.5px; }
+    .header p { color: rgba(255,255,255,0.8); margin: 8px 0 0; font-size: 1=
+4px; font-family: 'Inter', sans-serif; }
+    .greeting { padding: 28px 40px 0; color: #1E1B18; font-size: 15px; font=
+-family: 'Inter', sans-serif; line-height: 1.5; }
+    .topics { padding: 12px 40px 0; }
+    .topic-badge { display: inline-block; background: #F8ECE8; color: #C83A=
+2A; border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 6=
+00; margin-right: 6px; margin-bottom: 6px; font-family: 'Inter', sans-serif=
+; }
+    .divider { border: none; border-top: 1px solid #EAD9D3; margin: 24px 40=
+px; }
+    .article { padding: 0 40px 24px; }
+    .article-number { font-size: 11px; font-weight: 700; color: #C83A2A; te=
+xt-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; font-fami=
+ly: 'Inter', sans-serif; }
+    .article-title { font-size: 18px; font-weight: 700; color: #1E1B18; mar=
+gin: 0 0 8px; line-height: 1.4; font-family: 'Playfair Display', Georgia, s=
+erif; }
+    .article-meta { font-size: 12px; color: #7A6F68; margin-bottom: 10px; f=
+ont-family: 'Inter', sans-serif; }
+    .article-meta span { margin-right: 12px; }
+    .article-summary { font-size: 14px; color: #1E1B18; line-height: 1.7; m=
+argin-bottom: 14px; font-family: 'Inter', sans-serif; }
+    .read-link { display: inline-block; font-size: 13px; font-weight: 600; =
+color: #C83A2A; text-decoration: none; font-family: 'Inter', sans-serif; }
+    .read-link:hover { text-decoration: underline; }
+    .feedback { margin-top: 12px; }
+    .feedback-label { font-size: 11px; color: #7A6F68; font-family: 'Inter'=
+, sans-serif; margin-bottom: 6px; text-transform: uppercase; letter-spacing=
+: 0.5px; }
+    .feedback-btn { display: inline-block; text-decoration: none; font-size=
+: 12px; font-weight: 600; font-family: 'Inter', sans-serif; padding: 5px 14=
+px; border-radius: 20px; margin-right: 8px; }
+    .feedback-up { background: #F8ECE8; color: #C83A2A; }
+    .feedback-down { background: #f3f4f6; color: #7A6F68; }
+    .feedback-btn:hover { opacity: 0.8; }
+    .footer { background: #F8ECE8; padding: 28px 40px; text-align: center; =
+}
+    .footer p { font-size: 12px; color: #7A6F68; margin: 4px 0; font-family=
+: 'Inter', sans-serif; line-height: 1.6; }
+    .footer a { color: #C83A2A; text-decoration: underline; font-weight: 50=
+0; }
+  </style>
+</head>
+<body>
+  <div class=3D"wrapper">
+
+    <!-- Header -->
+    <div class=3D"header">
+      <div class=3D"header-logo">
+        <img src=3D"https://codesonline.rocks/logo-beige.png" alt=3D"TL;DR =
+Newsletter" />
+      </div>
+      <p>Your curated digest, July 02, 2026</p>
+    </div>
+
+    <!-- Greeting -->
+    <div class=3D"greeting">
+      Hi Alex S., here are your top 10 stories today.
+    </div>
+
+    <!-- Topic badges -->
+    <div class=3D"topics">
+     =20
+        <span class=3D"topic-badge">Fintech</span>
+     =20
+        <span class=3D"topic-badge">Startups</span>
+     =20
+    </div>
+
+    <hr class=3D"divider"/>
+
+    <!-- Articles -->
+   =20
+    <div class=3D"article">
+      <div class=3D"article-number">1 of 10</div>
+      <div class=3D"article-title">SoFi Acquires Composer, a Fintech Firm L=
+everaging Artificial Intelligence for Investment Strategies</div>
+      <div class=3D"article-meta">
+        <span>Finextra Research Headlines</span>
+        <span>4 min read</span>
+        <span>Fintech</span>
+      </div>
+      <div class=3D"article-summary">SoFi, a US fintech company, has acquir=
+ed Composer, a Toronto-based AI-powered retail investing startup. The acqui=
+sition terms were not disclosed. This move marks SoFi's expansion into AI-b=
+ased investing solutions.</div>
+      <a class=3D"read-link" href=3D"https://n5v1zgp3.r.us-east-1.awstrack.=
+me/L0/https:%2F%2Fwww.finextra.com%2Fnewsarticle%2F48026%2Fsofi-buys-ai-bas=
+ed-investing-startup-composer%3Futm_medium=3Drssfinextra%26utm_source=3Dfin=
+extrafeed/1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/Sj=
+gHhD3T2qP_NzmzRNWkBg_mM68=3D473" target=3D"_blank">Read full article =E2=86=
+=92</a>
+      <div class=3D"feedback">
+        <div class=3D"feedback-label">Was this useful?</div>
+        <a class=3D"feedback-btn feedback-up" href=3D"https://n5v1zgp3.r.us=
+-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fema=
+il=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.com%=
+252Fnewsarticle%252F48026%252Fsofi-buys-ai-based-investing-startup-composer=
+%253Futm_medium%253Drssfinextra%2526utm_source%253Dfinextrafeed%26source=3D=
+Finextra%2BResearch%2BHeadlines%26topic=3DFintech%26signal=3D1/1/0100019f21=
+9e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/fEq01qR-vAgtZxtEQpBOeaDW=
+sAE=3D473">Helpful</a>
+        <a class=3D"feedback-btn feedback-down" href=3D"https://n5v1zgp3.r.=
+us-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fe=
+mail=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.co=
+m%252Fnewsarticle%252F48026%252Fsofi-buys-ai-based-investing-startup-compos=
+er%253Futm_medium%253Drssfinextra%2526utm_source%253Dfinextrafeed%26source=
+=3DFinextra%2BResearch%2BHeadlines%26topic=3DFintech%26signal=3D-1/1/010001=
+9f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/WjhIVhKwK2IbqtEPEweU=
+GIPfAbU=3D473">Not relevant</a>
+      </div>
+    </div>
+    <hr class=3D"divider"/>
+   =20
+    <div class=3D"article">
+      <div class=3D"article-number">2 of 10</div>
+      <div class=3D"article-title">Singapore-based OCBC Bank Integrates AI-=
+Powered Financial Advisor Avatars into Mobile App</div>
+      <div class=3D"article-meta">
+        <span>Finextra Research Headlines</span>
+        <span>4 min read</span>
+        <span>Fintech</span>
+      </div>
+      <div class=3D"article-summary">OCBC has introduced AI-powered financi=
+al advisor avatars on its mobile app, providing 24/7 hyper-personalized wea=
+lth management services. The avatars use real-time data to offer tailored a=
+dvice and support to users. This move aims to enhance user experience and p=
+rovide more convenient access to financial services.</div>
+      <a class=3D"read-link" href=3D"https://n5v1zgp3.r.us-east-1.awstrack.=
+me/L0/https:%2F%2Fwww.finextra.com%2Fnewsarticle%2F48025%2Focbc-adds-ai-pow=
+ered-financial-advisor-avatars-to-app%3Futm_medium=3Drssfinextra%26utm_sour=
+ce=3Dfinextrafeed/1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-0=
+00000/V9HU1VgXWJyZnrO3fPTe0ubzNzw=3D473" target=3D"_blank">Read full articl=
+e =E2=86=92</a>
+      <div class=3D"feedback">
+        <div class=3D"feedback-label">Was this useful?</div>
+        <a class=3D"feedback-btn feedback-up" href=3D"https://n5v1zgp3.r.us=
+-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fema=
+il=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.com%=
+252Fnewsarticle%252F48025%252Focbc-adds-ai-powered-financial-advisor-avatar=
+s-to-app%253Futm_medium%253Drssfinextra%2526utm_source%253Dfinextrafeed%26s=
+ource=3DFinextra%2BResearch%2BHeadlines%26topic=3DFintech%26signal=3D1/1/01=
+00019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/B54kU6wa4Evo1rAj=
+LeSLfFN5vAk=3D473">Helpful</a>
+        <a class=3D"feedback-btn feedback-down" href=3D"https://n5v1zgp3.r.=
+us-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fe=
+mail=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.co=
+m%252Fnewsarticle%252F48025%252Focbc-adds-ai-powered-financial-advisor-avat=
+ars-to-app%253Futm_medium%253Drssfinextra%2526utm_source%253Dfinextrafeed%2=
+6source=3DFinextra%2BResearch%2BHeadlines%26topic=3DFintech%26signal=3D-1/1=
+/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/UVHFVdMDSwBeK=
+9VPZGFaXhDk48A=3D473">Not relevant</a>
+      </div>
+    </div>
+    <hr class=3D"divider"/>
+   =20
+    <div class=3D"article">
+      <div class=3D"article-number">3 of 10</div>
+      <div class=3D"article-title">Eurobank to Invest =E2=82=AC1 Billion in=
+ Technological Development</div>
+      <div class=3D"article-meta">
+        <span>Finextra Research Headlines</span>
+        <span>4 min read</span>
+        <span>Fintech</span>
+      </div>
+      <div class=3D"article-summary">Eurobank, a Greece-based financial ins=
+titution, is set to invest up to =E2=82=AC1 billion in technology as part o=
+f its digital transformation program. This significant investment aims to e=
+nhance the bank's services and operations through modern technology. The mo=
+ve reflects the growing importance of digitalization in the banking sector.=
+</div>
+      <a class=3D"read-link" href=3D"https://n5v1zgp3.r.us-east-1.awstrack.=
+me/L0/https:%2F%2Fwww.finextra.com%2Fnewsarticle%2F48021%2Feurobank-announc=
+es-1bn-tech-investment-plan%3Futm_medium=3Drssfinextra%26utm_source=3Dfinex=
+trafeed/1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/yF2v=
+fHTgOxGzZNu-8bu4zunamdo=3D473" target=3D"_blank">Read full article =E2=86=
+=92</a>
+      <div class=3D"feedback">
+        <div class=3D"feedback-label">Was this useful?</div>
+        <a class=3D"feedback-btn feedback-up" href=3D"https://n5v1zgp3.r.us=
+-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fema=
+il=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.com%=
+252Fnewsarticle%252F48021%252Feurobank-announces-1bn-tech-investment-plan%2=
+53Futm_medium%253Drssfinextra%2526utm_source%253Dfinextrafeed%26source=3DFi=
+nextra%2BResearch%2BHeadlines%26topic=3DFintech%26signal=3D1/1/0100019f219e=
+56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/BUY8fa1lJy810aVnY_XqvRTJjD=
+M=3D473">Helpful</a>
+        <a class=3D"feedback-btn feedback-down" href=3D"https://n5v1zgp3.r.=
+us-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fe=
+mail=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.co=
+m%252Fnewsarticle%252F48021%252Feurobank-announces-1bn-tech-investment-plan=
+%253Futm_medium%253Drssfinextra%2526utm_source%253Dfinextrafeed%26source=3D=
+Finextra%2BResearch%2BHeadlines%26topic=3DFintech%26signal=3D-1/1/0100019f2=
+19e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/qBcIL0zmwhBf43owobUtS-W=
+j0kQ=3D473">Not relevant</a>
+      </div>
+    </div>
+    <hr class=3D"divider"/>
+   =20
+    <div class=3D"article">
+      <div class=3D"article-number">4 of 10</div>
+      <div class=3D"article-title">JP Morgan and National Payments Corporat=
+ion of India Collaborate on Real-Time Foreign Exchange for</div>
+      <div class=3D"article-meta">
+        <span>Finextra Research Headlines</span>
+        <span>4 min read</span>
+        <span>Fintech</span>
+      </div>
+      <div class=3D"article-summary">JP Morgan Payments and NPCI have partn=
+ered to facilitate real-time foreign exchange (FX) conversions for cross-bo=
+rder transactions on the Unified Payments Interface (UPI). This collaborati=
+on enables instant currency conversion and settlement, streamlining interna=
+tional transactions for Indian businesses and consumers. The partnership ai=
+ms to enhance the efficiency and speed of cross-border payments.</div>
+      <a class=3D"read-link" href=3D"https://n5v1zgp3.r.us-east-1.awstrack.=
+me/L0/https:%2F%2Fwww.finextra.com%2Fnewsarticle%2F48024%2Fjp-morgan-paymen=
+ts-and-npci-team-up-to-power-real-time-fx-for-cross-border-upi%3Futm_medium=
+=3Drssfinextra%26utm_source=3Dfinextrafeed/1/0100019f219e56f7-e3c3848e-6acf=
+-4663-b5f0-5b3df9f9dfbf-000000/1HECTvRjjveA9dJmSx2d5gR8w5k=3D473" target=3D=
+"_blank">Read full article =E2=86=92</a>
+      <div class=3D"feedback">
+        <div class=3D"feedback-label">Was this useful?</div>
+        <a class=3D"feedback-btn feedback-up" href=3D"https://n5v1zgp3.r.us=
+-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fema=
+il=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.com%=
+252Fnewsarticle%252F48024%252Fjp-morgan-payments-and-npci-team-up-to-power-=
+real-time-fx-for-cross-border-upi%253Futm_medium%253Drssfinextra%2526utm_so=
+urce%253Dfinextrafeed%26source=3DFinextra%2BResearch%2BHeadlines%26topic=3D=
+Fintech%26signal=3D1/1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfb=
+f-000000/v_cUFT5FGaT3hVrIPmOuyh3cJsg=3D473">Helpful</a>
+        <a class=3D"feedback-btn feedback-down" href=3D"https://n5v1zgp3.r.=
+us-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fe=
+mail=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.co=
+m%252Fnewsarticle%252F48024%252Fjp-morgan-payments-and-npci-team-up-to-powe=
+r-real-time-fx-for-cross-border-upi%253Futm_medium%253Drssfinextra%2526utm_=
+source%253Dfinextrafeed%26source=3DFinextra%2BResearch%2BHeadlines%26topic=
+=3DFintech%26signal=3D-1/1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f=
+9dfbf-000000/EU0vq0x6lkh8I-eEy11cWSjnLhQ=3D473">Not relevant</a>
+      </div>
+    </div>
+    <hr class=3D"divider"/>
+   =20
+    <div class=3D"article">
+      <div class=3D"article-number">5 of 10</div>
+      <div class=3D"article-title">Artificial Intelligence Will Not Replace=
+ Human Bankers, Survey Indicates</div>
+      <div class=3D"article-meta">
+        <span>Finextra Research Headlines</span>
+        <span>4 min read</span>
+        <span>Fintech</span>
+      </div>
+      <div class=3D"article-summary">A recent survey suggests that artifici=
+al intelligence (AI) is not replacing financial services workers, but rathe=
+r augmenting their roles. The report indicates a shift from the notion that=
+ AI would eliminate the need for bankers. Instead, AI is being used to enha=
+nce the services provided by financial professionals.</div>
+      <a class=3D"read-link" href=3D"https://n5v1zgp3.r.us-east-1.awstrack.=
+me/L0/https:%2F%2Fwww.finextra.com%2Fnewsarticle%2F48020%2Fai-not-eliminati=
+ng-need-for-bankers---survey%3Futm_medium=3Drssfinextra%26utm_source=3Dfine=
+xtrafeed/1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/h8G=
+yUk0lKzFPXajz-GHV920ZBfg=3D473" target=3D"_blank">Read full article =E2=86=
+=92</a>
+      <div class=3D"feedback">
+        <div class=3D"feedback-label">Was this useful?</div>
+        <a class=3D"feedback-btn feedback-up" href=3D"https://n5v1zgp3.r.us=
+-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fema=
+il=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.com%=
+252Fnewsarticle%252F48020%252Fai-not-eliminating-need-for-bankers---survey%=
+253Futm_medium%253Drssfinextra%2526utm_source%253Dfinextrafeed%26source=3DF=
+inextra%2BResearch%2BHeadlines%26topic=3DFintech%26signal=3D1/1/0100019f219=
+e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/ymhA8TSnexyY24sMIm4ppfJRw=
+HQ=3D473">Helpful</a>
+        <a class=3D"feedback-btn feedback-down" href=3D"https://n5v1zgp3.r.=
+us-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fe=
+mail=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.co=
+m%252Fnewsarticle%252F48020%252Fai-not-eliminating-need-for-bankers---surve=
+y%253Futm_medium%253Drssfinextra%2526utm_source%253Dfinextrafeed%26source=
+=3DFinextra%2BResearch%2BHeadlines%26topic=3DFintech%26signal=3D-1/1/010001=
+9f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/WxkGhBK-AA_2kMrk84vA=
+hSnRYvw=3D473">Not relevant</a>
+      </div>
+    </div>
+    <hr class=3D"divider"/>
+   =20
+    <div class=3D"article">
+      <div class=3D"article-number">6 of 10</div>
+      <div class=3D"article-title">Indian Technology Entrepreneur Invests $=
+30 Million in Developing Office Software Alternative Using</div>
+      <div class=3D"article-meta">
+        <span>Startups | TechCrunch</span>
+        <span>5 min read</span>
+        <span>Startups</span>
+      </div>
+      <div class=3D"article-summary">Bhavin Turakhia, an Indian tech entrep=
+reneur, is investing $30 million of his own money to develop an AI-powered =
+alternative to Microsoft Office and Google Apps. This is his fifth venture,=
+ Neo, which aims to disrupt the enterprise software market. By leveraging A=
+I, Neo seeks to offer a more efficient and innovative solution to tradition=
+al office software.</div>
+      <a class=3D"read-link" href=3D"https://n5v1zgp3.r.us-east-1.awstrack.=
+me/L0/https:%2F%2Ftechcrunch.com%2F2026%2F07%2F01%2Findian-tech-tycoon-bets=
+-30m-to-build-an-ai-alternative-to-microsoft-office%2F/1/0100019f219e56f7-e=
+3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/l9dVtxUMFYhAFqdjxMRxBFzlivU=3D47=
+3" target=3D"_blank">Read full article =E2=86=92</a>
+      <div class=3D"feedback">
+        <div class=3D"feedback-label">Was this useful?</div>
+        <a class=3D"feedback-btn feedback-up" href=3D"https://n5v1zgp3.r.us=
+-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fema=
+il=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Ftechcrunch.com%25=
+2F2026%252F07%252F01%252Findian-tech-tycoon-bets-30m-to-build-an-ai-alterna=
+tive-to-microsoft-office%252F%26source=3DStartups%2B%257C%2BTechCrunch%26to=
+pic=3DStartups%26signal=3D1/1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3d=
+f9f9dfbf-000000/e-UUEkxipon0b-6YvuqwRZvVST8=3D473">Helpful</a>
+        <a class=3D"feedback-btn feedback-down" href=3D"https://n5v1zgp3.r.=
+us-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fe=
+mail=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Ftechcrunch.com%=
+252F2026%252F07%252F01%252Findian-tech-tycoon-bets-30m-to-build-an-ai-alter=
+native-to-microsoft-office%252F%26source=3DStartups%2B%257C%2BTechCrunch%26=
+topic=3DStartups%26signal=3D-1/1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5=
+b3df9f9dfbf-000000/OQcJj8s0XiKEG9dcXIECoW4oJJc=3D473">Not relevant</a>
+      </div>
+    </div>
+    <hr class=3D"divider"/>
+   =20
+    <div class=3D"article">
+      <div class=3D"article-number">7 of 10</div>
+      <div class=3D"article-title">Credit Agricole Introduces European Stab=
+lecoin for Digital Transactions</div>
+      <div class=3D"article-meta">
+        <span>Finextra Research Headlines</span>
+        <span>4 min read</span>
+        <span>Fintech</span>
+      </div>
+      <div class=3D"article-summary">Credit Agricole has launched a euro-de=
+nominated stablecoin, marking a European first in the development of a stab=
+lecoin tied to a major currency. The bank has also invested in a tokenized =
+Amundi money market fund, further expanding its foray into digital assets. =
+This move positions Credit Agricole at the forefront of European banking's =
+adoption of blockchain and digital finance technologies.</div>
+      <a class=3D"read-link" href=3D"https://n5v1zgp3.r.us-east-1.awstrack.=
+me/L0/https:%2F%2Fwww.finextra.com%2Fnewsarticle%2F48019%2Fcredit-agricole-=
+launches-euro-stablecoin%3Futm_medium=3Drssfinextra%26utm_source=3Dfinextra=
+feed/1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/7g3CSct=
+9PulnM2G4gaDTKyODp5s=3D473" target=3D"_blank">Read full article =E2=86=92</=
+a>
+      <div class=3D"feedback">
+        <div class=3D"feedback-label">Was this useful?</div>
+        <a class=3D"feedback-btn feedback-up" href=3D"https://n5v1zgp3.r.us=
+-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fema=
+il=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.com%=
+252Fnewsarticle%252F48019%252Fcredit-agricole-launches-euro-stablecoin%253F=
+utm_medium%253Drssfinextra%2526utm_source%253Dfinextrafeed%26source=3DFinex=
+tra%2BResearch%2BHeadlines%26topic=3DFintech%26signal=3D1/1/0100019f219e56f=
+7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/_1pqRb5JVCctvn5YD2bXklvXkRg=
+=3D473">Helpful</a>
+        <a class=3D"feedback-btn feedback-down" href=3D"https://n5v1zgp3.r.=
+us-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fe=
+mail=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.co=
+m%252Fnewsarticle%252F48019%252Fcredit-agricole-launches-euro-stablecoin%25=
+3Futm_medium%253Drssfinextra%2526utm_source%253Dfinextrafeed%26source=3DFin=
+extra%2BResearch%2BHeadlines%26topic=3DFintech%26signal=3D-1/1/0100019f219e=
+56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/b58JHbJ_mLHuBYEi0WP3tkP9JD=
+M=3D473">Not relevant</a>
+      </div>
+    </div>
+    <hr class=3D"divider"/>
+   =20
+    <div class=3D"article">
+      <div class=3D"article-number">8 of 10</div>
+      <div class=3D"article-title">Unlocking Scale: Practical Strategies fo=
+r Startups Revealed at TechCrunch Disrupt 2026</div>
+      <div class=3D"article-meta">
+        <span>Fintech News | TechCrunch</span>
+        <span>11 min read</span>
+        <span>Fintech</span>
+      </div>
+      <div class=3D"article-summary">TechCrunch Disrupt 2026's Builders Sta=
+ge returns with practical strategies for scaling startups, featuring conver=
+sations and Q&A sessions with founders, operators, and investors. The event=
+ will bring together over 10,000 attendees, offering a unique opportunity f=
+or networking and knowledge-sharing. Registration is now open, with early b=
+ird discounts available for a limited time.</div>
+      <a class=3D"read-link" href=3D"https://n5v1zgp3.r.us-east-1.awstrack.=
+me/L0/https:%2F%2Ftechcrunch.com%2F2026%2F07%2F01%2Fbuilders-stage-agenda-r=
+evealed-practical-strategies-for-scaling-startups-at-techcrunch-disrupt-202=
+6%2F/1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/CTeVJ6m=
+BJpDRK6mgQheQhn79ojY=3D473" target=3D"_blank">Read full article =E2=86=92</=
+a>
+      <div class=3D"feedback">
+        <div class=3D"feedback-label">Was this useful?</div>
+        <a class=3D"feedback-btn feedback-up" href=3D"https://n5v1zgp3.r.us=
+-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fema=
+il=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Ftechcrunch.com%25=
+2F2026%252F07%252F01%252Fbuilders-stage-agenda-revealed-practical-strategie=
+s-for-scaling-startups-at-techcrunch-disrupt-2026%252F%26source=3DFintech%2=
+BNews%2B%257C%2BTechCrunch%26topic=3DFintech%26signal=3D1/1/0100019f219e56f=
+7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/y72_4JOvkcfcgfwOAh0JF2yOKVs=
+=3D473">Helpful</a>
+        <a class=3D"feedback-btn feedback-down" href=3D"https://n5v1zgp3.r.=
+us-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fe=
+mail=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Ftechcrunch.com%=
+252F2026%252F07%252F01%252Fbuilders-stage-agenda-revealed-practical-strateg=
+ies-for-scaling-startups-at-techcrunch-disrupt-2026%252F%26source=3DFintech=
+%2BNews%2B%257C%2BTechCrunch%26topic=3DFintech%26signal=3D-1/1/0100019f219e=
+56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/qkQkTV4fsTLGGzrhCqDgbaWwMM=
+A=3D473">Not relevant</a>
+      </div>
+    </div>
+    <hr class=3D"divider"/>
+   =20
+    <div class=3D"article">
+      <div class=3D"article-number">9 of 10</div>
+      <div class=3D"article-title">Bank of England advocates for tailored a=
+rtificial intelligence regulatory framework</div>
+      <div class=3D"article-meta">
+        <span>Finextra Research Headlines</span>
+        <span>4 min read</span>
+        <span>Fintech</span>
+      </div>
+      <div class=3D"article-summary">The Bank of England is seeking a tailo=
+red regulatory approach to address the growing presence of autonomous artif=
+icial intelligence (AI) in the financial sector. A senior official emphasiz=
+es the need for a bespoke framework to ensure the safe and responsible deve=
+lopment of agentic AI. This move aims to mitigate potential risks associate=
+d with AI's increasing influence on financial markets.</div>
+      <a class=3D"read-link" href=3D"https://n5v1zgp3.r.us-east-1.awstrack.=
+me/L0/https:%2F%2Fwww.finextra.com%2Fnewsarticle%2F48022%2Fboe-calls-for-be=
+spoke-ai-regulation%3Futm_medium=3Drssfinextra%26utm_source=3Dfinextrafeed/=
+1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/FX1bHtYtOs8T=
+jCl6yvMC9nMJEkc=3D473" target=3D"_blank">Read full article =E2=86=92</a>
+      <div class=3D"feedback">
+        <div class=3D"feedback-label">Was this useful?</div>
+        <a class=3D"feedback-btn feedback-up" href=3D"https://n5v1zgp3.r.us=
+-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fema=
+il=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.com%=
+252Fnewsarticle%252F48022%252Fboe-calls-for-bespoke-ai-regulation%253Futm_m=
+edium%253Drssfinextra%2526utm_source%253Dfinextrafeed%26source=3DFinextra%2=
+BResearch%2BHeadlines%26topic=3DFintech%26signal=3D1/1/0100019f219e56f7-e3c=
+3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/AvbvSCE_nOWQyGm873rx2CNW2DA=3D473"=
+>Helpful</a>
+        <a class=3D"feedback-btn feedback-down" href=3D"https://n5v1zgp3.r.=
+us-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fe=
+mail=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Fwww.finextra.co=
+m%252Fnewsarticle%252F48022%252Fboe-calls-for-bespoke-ai-regulation%253Futm=
+_medium%253Drssfinextra%2526utm_source%253Dfinextrafeed%26source=3DFinextra=
+%2BResearch%2BHeadlines%26topic=3DFintech%26signal=3D-1/1/0100019f219e56f7-=
+e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/8fmdeCMvyHEyEqON8inEJO0QQ9Q=3D4=
+73">Not relevant</a>
+      </div>
+    </div>
+    <hr class=3D"divider"/>
+   =20
+    <div class=3D"article">
+      <div class=3D"article-number">10 of 10</div>
+      <div class=3D"article-title">Bending Spoons experiences significant g=
+rowth, surges 40% in first day of public trading on the</div>
+      <div class=3D"article-meta">
+        <span>Startups | TechCrunch</span>
+        <span>4 min read</span>
+        <span>Startups</span>
+      </div>
+      <div class=3D"article-summary">Bending Spoons, a company that has acq=
+uired and revamped last-generation tech brands, made a strong debut on the =
+market with a 40% surge in its first day of trading. The company's growth s=
+trategy involves revitalizing underutilized brands like AOL, Eventbrite, Ev=
+ernote, Meetup, and Vimeo. This move defies the current SaaS slump, indicat=
+ing a potential shift in the market's trend.</div>
+      <a class=3D"read-link" href=3D"https://n5v1zgp3.r.us-east-1.awstrack.=
+me/L0/https:%2F%2Ftechcrunch.com%2F2026%2F07%2F01%2Fbending-spoons-defies-s=
+aas-slump-surges-40-on-first-day-of-trading%2F/1/0100019f219e56f7-e3c3848e-=
+6acf-4663-b5f0-5b3df9f9dfbf-000000/s73aC9Xez2kF1oC6gQBX2BKUt-s=3D473" targe=
+t=3D"_blank">Read full article =E2=86=92</a>
+      <div class=3D"feedback">
+        <div class=3D"feedback-label">Was this useful?</div>
+        <a class=3D"feedback-btn feedback-up" href=3D"https://n5v1zgp3.r.us=
+-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fema=
+il=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Ftechcrunch.com%25=
+2F2026%252F07%252F01%252Fbending-spoons-defies-saas-slump-surges-40-on-firs=
+t-day-of-trading%252F%26source=3DStartups%2B%257C%2BTechCrunch%26topic=3DSt=
+artups%26signal=3D1/1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf=
+-000000/8ybYSPve1fhJADIxrZ77z4Dd43A=3D473">Helpful</a>
+        <a class=3D"feedback-btn feedback-down" href=3D"https://n5v1zgp3.r.=
+us-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2Fapi%2Ffeedback%3Fe=
+mail=3Dlyle090302%2540gmail.com%26url=3Dhttps%253A%252F%252Ftechcrunch.com%=
+252F2026%252F07%252F01%252Fbending-spoons-defies-saas-slump-surges-40-on-fi=
+rst-day-of-trading%252F%26source=3DStartups%2B%257C%2BTechCrunch%26topic=3D=
+Startups%26signal=3D-1/1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9d=
+fbf-000000/KLgcaqXq_XlOA3cFUKV8oYpfYqM=3D473">Not relevant</a>
+      </div>
+    </div>
+   =20
+   =20
+
+    <!-- Footer -->
+    <div class=3D"footer">
+      <p style=3D"font-size: 16px; font-weight: 700; color: #1E1B18; margin=
+: 0 0 8px; font-family: 'Inter', sans-serif;">Got 60 seconds?</p>
+      <p style=3D"font-size: 14px; color: #7A6F68; margin: 0 0 16px; font-f=
+amily: 'Inter', sans-serif;">Your feedback shapes the next edition.</p>
+      <a href=3D"https://n5v1zgp3.r.us-east-1.awstrack.me/L0/https:%2F%2Ffo=
+rms.office.com%2Fr%2FhNbTisJrNb/1/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-=
+5b3df9f9dfbf-000000/0EGkv8FUXFeaegVci4tk2uwGeds=3D473" target=3D"_blank" st=
+yle=3D"display: inline-block; background: #C83A2A; color: #ffffff; font-siz=
+e: 14px; font-weight: 600; font-family: 'Inter', sans-serif; padding: 10px =
+24px; border-radius: 24px; text-decoration: none; margin-bottom: 20px;">Sha=
+re your thoughts =E2=86=92</a>
+      <p>Fine-tune what and how often you receive TL;DR Newsletter.</p>
+      <p><a href=3D"https://n5v1zgp3.r.us-east-1.awstrack.me/L0/https:%2F%2=
+Fcodesonline.rocks%2Fapi%2Funsubscribe%3Femail=3Dlyle090302%2540gmail.com/1=
+/0100019f219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/lL9wNcX0MrIlE=
+fz2WieTeWBLrKc=3D473">Unsubscribe</a> =C2=B7 <a href=3D"https://n5v1zgp3.r.=
+us-east-1.awstrack.me/L0/https:%2F%2Fcodesonline.rocks%2F%23form/1/0100019f=
+219e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/BcdAzYgePClj2jjtQb2GKw=
+4OCbY=3D473">Update preferences</a></p>
+    </div>
+
+  </div>
+<img alt=3D"" src=3D"https://n5v1zgp3.r.us-east-1.awstrack.me/I0/0100019f21=
+9e56f7-e3c3848e-6acf-4663-b5f0-5b3df9f9dfbf-000000/_gCjAaZ-8kaAUNbtRuzT6O-D=
+YNY=3D473" style=3D"display: none; width: 1px; height: 1px;">
+</body>
+</html>
+------=_Part_640285_1619914374.1782975452919--

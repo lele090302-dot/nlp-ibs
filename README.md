@@ -38,7 +38,7 @@ The result: a 5-minute read that covers exactly what matters to you.
 │     └─ Cosine similarity: article embedding ↔ topic embedding       │
 │     └─ Recency decay: exponential half-life (36h) penalizes stale   │
 │     └─ Threshold filter (≥ 0.2) with progressive cascade            │
-│        (0.15 → 0.10 → 0.05 → no threshold) if too few articles     │
+│        (0.15 → 0.10 → 0.05 → no threshold) if too few articles      │
 │                                                                     │
 │  2. Balanced Topic Distribution                                     │
 │     └─ Slots allocated equally across user's chosen topics          │
@@ -50,8 +50,8 @@ The result: a 5-minute read that covers exactly what matters to you.
 │                                                                     │
 │  4. LLM Title Rephrasing                                            │
 │     └─ Groq API (Llama 3.1 8B Instant)                              │
-│     └─ Crisp, engaging headlines ≤100 chars for academic audience    │
-│     └─ Truncation detection + fallback to cleaned original           │
+│     └─ Crisp, engaging headlines ≤100 chars for academic audience   │
+│     └─ Truncation detection + fallback to cleaned original          │
 │                                                                     │
 │  5. LLM Summarization                                               │
 │     └─ Groq API (Llama 3.1 8B Instant)                              │
@@ -235,10 +235,21 @@ The scheduler runs as a systemd service on AWS EC2 with:
 
 ---
 
-## Screenshots
+## Sample Edition
+
+Here's what a subscriber receives every morning:
+
+![Sample newsletter edition](image-1.png)
+
+📩 [Download the raw email file](sample_edition.eml) to view an actual full edition in your mail client.
+
+---
+
+## Landing Page
 
 ![Screenshot 1](image.png)
-![Screenshot 2](image-1.png)
+
+🔴 Live at codesonline.rocks — feel free to subscribe! You'll receive a verification email, and you can unsubscribe anytime.
 
 ---
 
@@ -246,9 +257,9 @@ The scheduler runs as a systemd service on AWS EC2 with:
 
 - Sentence embeddings are surprisingly effective for content relevance scoring — much better than TF-IDF or keyword matching for this use case
 - Prompt engineering matters: small changes to the summarization prompt dramatically affect output quality
-- A two-phase pipeline (stage → review → send) gives editorial control without blocking automation
+- A two-phase pipeline (stage → review → send) gives editorial control without blocking automation. I caught a few glitched links during review that came from NewsAPI — and blocked that source going forward.
 - Feedback loops create a virtuous cycle — even simple thumbs up/down signals meaningfully improve personalization over time
-- Guaranteed minimum delivery (progressive threshold cascade + freshness widening) is essential — an empty newsletter is worse than a slightly less relevant one
+- Guaranteed minimum delivery (progressive threshold cascade + freshness widening) is essential — an empty newsletter is worse than a slightly less relevant one. Early on, strict relevance grading caused one edition to deliver only 2 articles; thanks to a subscriber's feedback that prompted the cascade fix.
 - Balanced topic distribution prevents a single trending topic from dominating the entire newsletter
 - Sharing a SQLite database between a Python backend and Next.js frontend is pragmatic for a solo project but wouldn't scale to production
 
