@@ -7,6 +7,8 @@ from datetime import datetime
 # Override via APP_BASE_URL env var in production.
 APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8501")
 
+LOGO_URL = os.getenv("NEWSLETTER_LOGO_URL", f"{APP_BASE_URL}/logo-beige.png") 
+
 
 def build_feedback_url(base_url: str, email: str, article_url: str, article_source: str, article_topic: str, signal: int) -> str:
     """Build a feedback URL that encodes all context needed to log the vote."""
@@ -49,7 +51,7 @@ def build_html(user_name: str, user_email: str, topics: list[str], articles: lis
         date=datetime.utcnow().strftime("%B %d, %Y"),
         unsubscribe_url=unsubscribe_url,
         preferences_url=preferences_url,
-        logo_url=f"{APP_BASE_URL}/logo-beige.png",
+        logo_url=LOGO_URL,
     )
 
     # Size guard: reduce articles if HTML exceeds Gmail clip limit
@@ -62,7 +64,7 @@ def build_html(user_name: str, user_email: str, topics: list[str], articles: lis
             date=datetime.utcnow().strftime("%B %d, %Y"),
             unsubscribe_url=unsubscribe_url,
             preferences_url=preferences_url,
-            logo_url=f"{APP_BASE_URL}/logo-beige.png",
+            logo_url=LOGO_URL,
         )
 
     return html
