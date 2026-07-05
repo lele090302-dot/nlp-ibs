@@ -237,7 +237,7 @@ The scheduler runs as a systemd service on AWS EC2 with:
 
 ## Sample Edition
 
-Here's what a subscriber receives every morning:
+Here's an example of what a subscriber receives every morning:
 
 ![Sample newsletter edition](image-1.png)
 
@@ -249,7 +249,7 @@ Here's what a subscriber receives every morning:
 
 ![Screenshot 1](image.png)
 
-🔴 Live at codesonline.rocks — feel free to subscribe! You'll receive a verification email, and you can unsubscribe anytime.
+🔴 Live at [codesonline.rocks](https://codesonline.rocks/) — feel free to subscribe! You'll receive a verification email, and you can unsubscribe anytime.
 
 ---
 
