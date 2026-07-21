@@ -41,9 +41,8 @@ def build_html(user_name: str, user_email: str, topics: list[str], articles: lis
             signal=-1,
         )
 
-    # Build unsubscribe and preferences URLs
+    # Build unsubscribe URL
     unsubscribe_url = f"{APP_BASE_URL}/api/unsubscribe?{urlencode({'email': user_email})}"
-    preferences_url = f"{APP_BASE_URL}/#form"
 
     html = template.render(
         user_name=user_name,
@@ -51,7 +50,6 @@ def build_html(user_name: str, user_email: str, topics: list[str], articles: lis
         articles=articles,
         date=datetime.utcnow().strftime("%B %d, %Y"),
         unsubscribe_url=unsubscribe_url,
-        preferences_url=preferences_url,
     )
 
     # Size guard: reduce articles if HTML exceeds Gmail clip limit
@@ -63,7 +61,6 @@ def build_html(user_name: str, user_email: str, topics: list[str], articles: lis
             articles=articles,
             date=datetime.utcnow().strftime("%B %d, %Y"),
             unsubscribe_url=unsubscribe_url,
-            preferences_url=preferences_url,
         )
 
     return html
