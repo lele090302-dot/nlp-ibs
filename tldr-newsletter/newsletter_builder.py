@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Base URL where the Streamlit app is running — used to build feedback links in emails.
-# Override via APP_BASE_URL env var in production.
-APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8501")
+# Base URL for email links (feedback, unsubscribe, preferences).
+# MUST point to the public landing page — never localhost.
+APP_BASE_URL = os.getenv("APP_BASE_URL", "https://codesonline.rocks")
 
 
 def build_feedback_url(base_url: str, email: str, article_url: str, article_source: str, article_topic: str, signal: int) -> str:
