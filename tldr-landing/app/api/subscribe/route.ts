@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 // Map landing page topic labels to the values the Python backend expects
 const TOPIC_MAP: Record<string, string> = {
@@ -15,6 +16,45 @@ const TOPIC_MAP: Record<string, string> = {
 const DB_PATH = process.env.DB_PATH
   ? path.resolve(process.env.DB_PATH)
   : path.resolve(process.cwd(), "../tldr-newsletter/data/users.db");
+
+// Admin notification via SES
+async function notifyAdmin(subscriberName: string, subscriberEmail: string, topics: string[], frequency: string) {
+  const region = process.env.AWS_REGION || "us-east-1";
+  const senderEmail = process.env.SES_SENDER_EMAIL;
+  const adminEmail = process.env.ADMIN_EMAIL;
+
+  if (!senderEmail || !adminEmail) {
+    console.warn("[subscribe] ADMIN_EMAIL or SES_SENDER_EMAIL not set — skipping notification");
+    return;
+  }
+
+  const ses = new SESClient({ region });
+
+  const subject = `New subscriber: ${subscriberName}`;
+  const body = [
+    `New newsletter signup:`,
+    ``,
+    `Name: ${subscriberName}`,
+    `Email: ${subscriberEmail}`,
+    `Topics: ${topics.join(", ")}`,
+    `Frequency: ${frequency}`,
+    `Time: ${new Date().toISOString()}`,
+  ].join("\n");
+
+  try {
+    await ses.send(new SendEmailCommand({
+      Source: senderEmail,
+      Destination: { ToAddresses: [adminEmail] },
+      Message: {
+        Subject: { Data: subject },
+        Body: { Text: { Data: body } },
+      },
+    }));
+    console.log(`[subscribe] Admin notified about new subscriber: ${subscriberEmail}`);
+  } catch (err) {
+    console.error("[subscribe] Failed to notify admin:", err);
+  }
+}
 
 export async function POST(req: NextRequest) {
   let body: { name?: string; email?: string; topics?: string[]; frequency?: string };
@@ -82,6 +122,10 @@ export async function POST(req: NextRequest) {
     ).run(name.trim(), email.trim(), normalisedTopics.join(","), freq, createdAt);
 
     db.close();
+
+    // Notify admin of new signup (fire-and-forget — don't block the response)
+    notifyAdmin(name.trim(), email.trim(), normalisedTopics, freq);
+
     return NextResponse.json({ message: "Subscribed successfully!" }, { status: 201 });
 
   } catch (err) {

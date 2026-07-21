@@ -6,7 +6,7 @@ Two-phase schedule:
   05:50 UTC (07:50 CEST) - Send: use admin-approved articles (or AI fallback if < 10 approved)
 
 Daily users  get emails every day.
-Weekly users get emails every Monday.
+Weekly users get emails every Thursday.
 
 Run with: python scheduler.py
 """
@@ -35,18 +35,18 @@ def daily_send():
     send_pipeline(run_id=run_id, frequency_filter="daily")
 
 
-# ── Weekly users (Mondays only) ───────────────────────────────────────────────
+# ── Weekly users (Thursdays only) ─────────────────────────────────────────────
 
-@scheduler.scheduled_job("cron", day_of_week="mon", hour=5, minute=0)
+@scheduler.scheduled_job("cron", day_of_week="thu", hour=5, minute=0)
 def weekly_stage():
-    """Stage articles for weekly subscribers every Monday at 05:00 UTC (07:00 CEST)."""
+    """Stage articles for weekly subscribers every Thursday at 05:00 UTC (07:00 CEST)."""
     print("[Scheduler] Weekly stage job starting...")
     stage_pipeline(frequency_filter="weekly")
 
 
-@scheduler.scheduled_job("cron", day_of_week="mon", hour=5, minute=50)
+@scheduler.scheduled_job("cron", day_of_week="thu", hour=5, minute=50)
 def weekly_send():
-    """Send to weekly subscribers every Monday at 05:50 UTC (07:50 CEST)."""
+    """Send to weekly subscribers every Thursday at 05:50 UTC (07:50 CEST)."""
     print("[Scheduler] Weekly send job starting...")
     run_id = get_latest_run_id()
     send_pipeline(run_id=run_id, frequency_filter="weekly")
@@ -56,8 +56,8 @@ if __name__ == "__main__":
     init_db()
     print("[Scheduler] Starting... Press Ctrl+C to stop.")
     print("[Scheduler] Schedule:")
-    print("  05:00 UTC (07:00 CEST) daily   - stage (fetch + rank + notify admin)")
-    print("  05:50 UTC (07:50 CEST) daily   - send  (approved or AI fallback)")
-    print("  05:00 UTC (07:00 CEST) Monday  - stage (weekly users)")
-    print("  05:50 UTC (07:50 CEST) Monday  - send  (weekly users)")
+    print("  05:00 UTC (07:00 CEST) daily    - stage (fetch + rank + notify admin)")
+    print("  05:50 UTC (07:50 CEST) daily    - send  (approved or AI fallback)")
+    print("  05:00 UTC (07:00 CEST) Thursday - stage (weekly users)")
+    print("  05:50 UTC (07:50 CEST) Thursday - send  (weekly users)")
     scheduler.start()

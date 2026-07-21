@@ -58,8 +58,8 @@ export default function Hero({ selectedTopics, onTopicsChange }: Props) {
       if (res.ok) {
         setStatus("success");
         const cadenceMsg = cadence === "daily"
-          ? "Your newsletter will be delivered every day at 8:00 AM CET/CEST, before your first coffee."
-          : "Your newsletter will be delivered every Monday at 8:00 AM CET/CEST, before your first coffee.";
+          ? "Your newsletter will be delivered every day at 7:50 AM CEST, before your first coffee."
+          : "Your newsletter will be delivered every Thursday at 7:50 AM CEST, before your first coffee.";
         setMessage(`Preferences updated! ${cadenceMsg}`);
       } else {
         setStatus("error");

@@ -26,3 +26,7 @@ data/users.db
 # OS
 .DS_Store
 Thumbs.db
+
+*.log
+Terminal Saved Output*.txt
+PRESENTATION_SLIDES.md

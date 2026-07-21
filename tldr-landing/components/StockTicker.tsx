@@ -96,7 +96,10 @@ export default function StockTicker() {
           </div>
           {data?.lastUpdated && (
             <span className="text-[10px] font-sans text-muted">
-              Updated {new Date(data.lastUpdated).toLocaleTimeString([], {
+              Updated {new Date(data.lastUpdated).toLocaleDateString([], {
+                month: "short", day: "numeric",
+              })}{" "}
+              {new Date(data.lastUpdated).toLocaleTimeString([], {
                 hour: "2-digit", minute: "2-digit",
               })}
             </span>
