@@ -39,7 +39,7 @@ from sender import send_to_all_users, send_newsletter
 
 
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "")
-APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8501")
+APP_BASE_URL = os.getenv("APP_BASE_URL", "https://codesonline.rocks")
 
 # How many candidates to surface for admin review
 REVIEW_POOL_SIZE = 15
