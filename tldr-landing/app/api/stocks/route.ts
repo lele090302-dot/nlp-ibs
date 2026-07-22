@@ -93,8 +93,9 @@ export async function GET() {
 
   // Serve from cache if:
   // - cache is fresh (< 60 min old), OR
-  // - market is closed (prices haven't changed since last fetch)
-  if (cachedData && (cacheAge < CACHE_TTL_MS || !marketOpen)) {
+  // - market is closed AND data is < 24 hours old (prices won't change until next open)
+  const MAX_STALE_MS = 24 * 60 * 60 * 1000; // 24 hours max staleness
+  if (cachedData && (cacheAge < CACHE_TTL_MS || (!marketOpen && cacheAge < MAX_STALE_MS))) {
     return NextResponse.json(
       { ...cachedData, marketOpen },
       {
