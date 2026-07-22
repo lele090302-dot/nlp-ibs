@@ -228,7 +228,7 @@ def summarize_article(article: dict) -> str:
 REPHRASE_TITLE_PROMPT = """Rewrite the following article headline.
 
 Rules:
-- Maximum 70 characters (this is a hard limit — do NOT exceed it)
+- Maximum 120 characters (this is a hard limit — do NOT exceed it)
 - Crisp, catchy, and engaging for an academically-minded audience
 - No clickbait, no sensationalized language, no ALL CAPS, no tabloid style
 - No jargon or abbreviations — expand any acronym that is not universally known
@@ -241,7 +241,7 @@ Original headline: {title}
 Rewritten headline:"""
 
 
-def _truncate_at_word_boundary(text: str, max_len: int = 70) -> str:
+def _truncate_at_word_boundary(text: str, max_len: int = 120) -> str:
     """Truncate text to max_len at the nearest preceding word boundary."""
     if len(text) <= max_len:
         return text
@@ -292,7 +292,7 @@ def rephrase_title(article: dict) -> dict:
         response = get_groq_client().chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=80,
+            max_tokens=150,
             temperature=0.7,
         )
         rephrased = response.choices[0].message.content.strip()
@@ -305,7 +305,7 @@ def rephrase_title(article: dict) -> dict:
             and not _is_unchanged_title(original_title, rephrased)
             and not _is_truncated_title(rephrased)
         ):
-            article['title'] = _truncate_at_word_boundary(rephrased, 70)
+            article['title'] = _truncate_at_word_boundary(rephrased, 120)
         else:
             logger.warning(f"[NLP] Title rephrase returned invalid/truncated response for '{original_title}': using fallback")
             article['title'] = _clean_title_fallback(original_title)
