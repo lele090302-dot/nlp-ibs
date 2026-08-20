@@ -234,6 +234,7 @@ Rules:
 - No jargon or abbreviations — expand any acronym that is not universally known
 - Preserve the factual meaning: named entities, numbers, and the core claim must remain
 - The headline MUST be a complete phrase — never cut off mid-sentence
+- Do NOT end with a period or any terminal punctuation
 - Output ONLY the rewritten headline, nothing else
 
 Original headline: {title}
@@ -305,7 +306,7 @@ def rephrase_title(article: dict) -> dict:
             and not _is_unchanged_title(original_title, rephrased)
             and not _is_truncated_title(rephrased)
         ):
-            article['title'] = _truncate_at_word_boundary(rephrased, 120)
+            article['title'] = _truncate_at_word_boundary(rephrased, 120).rstrip('.')
         else:
             logger.warning(f"[NLP] Title rephrase returned invalid/truncated response for '{original_title}': using fallback")
             article['title'] = _clean_title_fallback(original_title)

@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Base URL for email links (feedback, unsubscribe, preferences).
-# MUST point to the public landing page — never localhost.
 APP_BASE_URL = os.getenv("APP_BASE_URL", "https://codesonline.rocks")
 
 

@@ -17,7 +17,7 @@ init_db()
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="TL;DR Newsletter",
-    page_icon="⚡",
+    page_icon="📰",
     layout="centered",
 )
 
@@ -65,7 +65,7 @@ if params.get("admin_action") in ("approve", "reject"):
     st.stop()
 
 # ── Header ────────────────────────────────────────────────────────────────────
-st.title("⚡ TL;DR Newsletter")
+st.title("TL;DR Newsletter")
 st.markdown(
     "AI-curated digest of the top 8-10 stories in your chosen topics, "
     "delivered to your inbox."

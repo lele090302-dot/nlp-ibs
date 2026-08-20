@@ -96,12 +96,15 @@ export default function StockTicker() {
           </div>
           {data?.lastUpdated && (
             <span className="text-[10px] font-sans text-muted">
-              Updated {new Date(data.lastUpdated).toLocaleDateString([], {
-                month: "short", day: "numeric",
-              })}{" "}
-              {new Date(data.lastUpdated).toLocaleTimeString([], {
-                hour: "2-digit", minute: "2-digit",
-              })}
+              {isLive && marketOpen
+                ? `Updated ${new Date(data.lastUpdated).toLocaleTimeString([], {
+                    hour: "2-digit", minute: "2-digit",
+                  })}`
+                : isLive && !marketOpen
+                ? `Prices as of ${new Date(data.lastUpdated).toLocaleDateString([], {
+                    month: "short", day: "numeric",
+                  })}`
+                : null}
             </span>
           )}
         </div>

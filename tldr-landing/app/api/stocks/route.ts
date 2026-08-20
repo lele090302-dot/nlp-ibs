@@ -93,14 +93,15 @@ export async function GET() {
 
   // Serve from cache if:
   // - cache is fresh (< 60 min old), OR
-  // - market is closed AND data is < 24 hours old (prices won't change until next open)
-  const MAX_STALE_MS = 24 * 60 * 60 * 1000; // 24 hours max staleness
+  // - market is closed AND data is < 72 hours old (covers weekends: Fri close → Mon open)
+  const MAX_STALE_MS = 72 * 60 * 60 * 1000; // 72 hours max staleness (covers full weekend)
   if (cachedData && (cacheAge < CACHE_TTL_MS || (!marketOpen && cacheAge < MAX_STALE_MS))) {
+    // When serving stale closed-market cache, keep the original fetch timestamp so
+    // the UI can show "prices as of [date]" accurately.
     return NextResponse.json(
       { ...cachedData, marketOpen },
       {
         headers: {
-          // Tell browsers: cache for 60 min, allow stale while revalidating
           "Cache-Control": "public, max-age=3600, stale-while-revalidate=300",
         },
       }
